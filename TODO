@@ -1,5 +1,7 @@
-* improve the GUI
-* clean up code
+* improve the GUI (dockapp etc.)
 * make packages for easy install
+* support other languages (gettext)
+* test on Telenet duo, quattro, ...
+* improve execution speed
 
-Feel free to suggest other features to <robbie.vanbrabant@pandora.be>
+Feel free to suggest other features to <climaxius@users.sourceforge.net>
