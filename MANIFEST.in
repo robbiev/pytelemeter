@@ -5,6 +5,8 @@ include INSTALL
 include MANIFEST.in
 include README
 include TODO
+include images/*
+include eggtray/*
 include scripts/*
 include lib/*.py
 include pytelemeterrc
