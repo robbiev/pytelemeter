@@ -2,7 +2,7 @@
 #
 # Geeft download en upload statistieken van de Mijn Telenet pagina.
 # door Robbie Vanbrabant <robbie.vanbrabant@pandora.be>
-# en Thomas Matthijs <knu@keanu.be>  ;-)
+# en Thomas Matthijs <knu@keanu.be>
 
 import sys
 import ConfigParser
@@ -24,10 +24,11 @@ configfile = os.environ['HOME'] + "/.pytelemeterrc"
 URL_LOGIN = "https://www.telenet.be/sys/sso/exec_login.php"
 URL_MAIN = "https://services.telenet.be/isps/MainServlet"
 URL_OVERVIEW = "https://services.telenet.be/isps/be/telenet/ebiz/ium/Histogram.jsp"
+
 REGEX_COOKIE = "([A-Z]+=[^;]+;)"
 REGEX_COOKIE_SSOSID = "SSOSID=([^;]+);"
- 
 REGEX_FAILURE = "Authenticatie niet gelukt"
+
 REGEX_OVERVIEW_TOTALUSED = "(?s)<(?:TD class=\"header\" align=\"right\"*)>(.*?) MB</TD>"
 REGEX_OVERVIEW_DAYS = "<TR>[^<]+<TD class=\"(?:odd|even)\">[^0-9]+([0-9]{2}/[0-9]{2}/[0-9]{2})[^<]+</TD>[^<]+<TD class=\"(?:odd|even)\" align=\"right\">[^0-9]+([0-9]+)[^<]+</TD>[^<]+<TD class=\"(?:odd|even)\" align=\"right\">[^0-9]+([0-9]+)[^<]+</TD>[^<]+</TR>"
 REGEX_MAIN_USED_TOTAL = "Totaal verbruikt volume \(downstream \+ upstream\)</a>[^<]+<b>([0-9]+)%</b><br>"
