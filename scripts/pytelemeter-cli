@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 #
 # pytelemeter CLI script 
-# Geeft download en upload statistieken van de Mijn Telenet pagina.
+# Shows some statistics from the "Mijn Telenet" page.
 # 
-# door Robbie Vanbrabant <robbie.vanbrabant@pandora.be>
-# en Thomas Matthijs <knu@keanu.be>
+# See COPYING for info about the license (GNU GPL)
+# Check AUTHORS to see who wrote this software.
 
 from pytelemeter import Telemeter
 import getopt, sys, time

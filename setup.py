@@ -1,7 +1,10 @@
 #!/usr/bin/env python
 #
-# pytelemeter installatiescript
-# door Robbie Vanbrabant <robbie.vanbrabant@pandora.be>
+# pytelemeter install script 
+# Installs all files needed.
+# 
+# See COPYING for info about the license (GNU GPL)
+# Check AUTHORS to see who wrote this software.
 
 
 

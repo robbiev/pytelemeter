@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 #
-# pytelemeter GTK interface
-# Geeft download en upload statistieken van de Mijn Telenet pagina.
-#
-# door Robbie Vanbrabant <robbie.vanbrabant@pandora.be>
-#
+# pytelemeter GTK script 
+# Shows some statistics from the "Mijn Telenet" page.
+# 
+# See COPYING for info about the license (GNU GPL)
+# Check AUTHORS to see who wrote this software.
 
 import gtk
 from pytelemeter import Telemeter
@@ -75,24 +75,24 @@ class PyTeleGui:
 		table.attach(separator, 0, 2, 2, 3,xoptions=gtk.FILL, yoptions=gtk.FILL, xpadding=5, ypadding=5)
 		separator.show()
 
-		# tabelletje voor knoppen
+		# table for some buttons 
 		table2 = gtk.Table(1, 2, gtk.FALSE)
 		
 		# Add a button to exit the program
-        	button = gtk.Button("Sluiten")
+        	button = gtk.Button("Close")
         	button.connect("clicked", gtk.mainquit)
         	table2.attach(button, 1, 2, 0, 1,xoptions=gtk.EXPAND|gtk.FILL, yoptions=gtk.EXPAND|gtk.FILL, xpadding=5, ypadding=3)
         	button.show()
 
-		# knop voor te refreshen
-		button2 = gtk.Button("Vernieuw")
+		# Button for refresh
+		button2 = gtk.Button("Refresh")
         	button2.connect("clicked", self.fillInfo)
         	table2.attach(button2, 0, 1, 0, 1,xoptions=gtk.EXPAND|gtk.FILL, yoptions=gtk.EXPAND|gtk.FILL, xpadding=5, ypadding=3)
         	button2.show()
 
 		table.attach(table2, 0, 2, 3, 4,xoptions=gtk.EXPAND|gtk.FILL, yoptions=gtk.EXPAND|gtk.FILL, xpadding=0, ypadding=0)
 	
-		# alles tonen
+		# Show tables
 		table.show()
 		table2.show()
         	#self.window.show()
