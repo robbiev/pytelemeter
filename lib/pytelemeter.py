@@ -13,12 +13,16 @@ import re
 import urllib
 import urllib2
 
+# Use this for verbose debug output
+#import httplib
+#httplib.HTTPConnection.debuglevel = 1  
+
 VERSION = "0.9"
 
 # config file
 configfile = os.environ['HOME'] + "/.pytelemeterrc"
 
-URL_LOGIN = "https://www.telenet.be/sys/sso/exec_login.php"
+URL_LOGIN = "https://www.telenet.be/sys/sso/signon.jsp"
 URL_MAIN = "https://services.telenet.be/isps/MainServlet"
 URL_OVERVIEW = "https://services.telenet.be/isps/be/telenet/ebiz/ium/Histogram.jsp"
 
@@ -28,8 +32,8 @@ REGEX_FAILURE = "Authenticatie niet gelukt"
 
 REGEX_OVERVIEW_TOTALUSED = "(?s)<(?:TD class=\"header\" align=\"right\"*)>(.*?) MB</TD>"
 REGEX_OVERVIEW_DAYS = "<TR>[^<]+<TD class=\"(?:odd|even)\">[^0-9]+([0-9]{2}/[0-9]{2}/[0-9]{2})[^<]+</TD>[^<]+<TD class=\"(?:odd|even)\" align=\"right\">[^0-9]+([0-9]+)[^<]+</TD>[^<]+<TD class=\"(?:odd|even)\" align=\"right\">[^0-9]+([0-9]+)[^<]+</TD>[^<]+</TR>"
-REGEX_MAIN_USED_TOTAL = "Totaal verbruikt volume \(downstream \+ upstream\)</a>[^<]+<b>([0-9]+)%</b><br>"
-REGEX_MAIN_USED_UPLOAD = "Upstream verbruikt volume\</a>[^<]+<b>([0-9]+)%</b><br>"
+REGEX_MAIN_USED = "<b>([0-9]+)%</b><br>"
+
 REGEX_MAIN_MAX = "Het toegelaten totaal volume op jouw product is[^<]+<b>[ ]*([0-9]+)[ ]*GB</b> per 30 dagen, waarvan[^<]+<b>[ ]*([,0-9]+)[ ]*GB</b> upstream"
 REGEX_MAIN_DATEBROAD = "Door overschrijding van uw toegelaten volume werd de snelheid van uw modem beperkt. Uw snelheid wordt automatisch hersteld op <b>[^0-9]+([0-9]{2}/[0-9]{2}/[0-9]{4})[^<]+</b>"
 
@@ -47,7 +51,8 @@ class Telemeter:
 		self.htmlOverview = ""
 
 		self.cookie = ""
-		
+		self.jsessionid = ""
+	
 	def fetch(self,silent=0):
 		if (self.username == "" or self.password == ""):
 			self.checkConfig()
@@ -58,34 +63,37 @@ class Telemeter:
 		 
 		self.getCookie()
 		self.htmlMain = self.getMainHtml()
+		
 		self.htmlOverview = self.getOverviewHtml()
-
-                if silent == 0:
+                
+		if silent == 0:
 		    sys.stdout.write("done!\n")
 	
 	def getCookie(self):
 		try:
-			urllib.URLopener().open(URL_LOGIN,urllib.urlencode({'goto': 'www.telenet.be','alt': '/mijntelenet/login.php','uid': self.username,'pwd': self.password}))
+			resp = urllib.URLopener().open(URL_LOGIN,urllib.urlencode({'goto': 'http://www.telenet.be/mijntelenet/index.php?content=https%3A%2F%2Fwww.telenet.be%2Fsys%2Fsso%2Fjump.php%3Fhttps%3A%2F%2Fservices.telenet.be%2Fisps%2FMainServlet%3FACTION%3DTELEMTR%26SSOSID%3D%24SSOSID%24','alt': '/mijntelenet/login.php','uid': self.username,'pwd': self.password}))
+		
+			cook =  re.findall(REGEX_COOKIE,resp.info()["Set-Cookie"])
+			for i in cook:
+                                self.cookie += i + " "
+
 		except IOError, (ignored,ignored,ignored,headers):
                         #find a better way!
                         if re.search(REGEX_FAILURE,headers["Location"]):
                             fatalError("\nUsername/password combination incorrect.")
-
-			cookies = headers["Set-Cookie"]
-			for i in re.findall(REGEX_COOKIE,cookies):
-				self.cookie += i + " "
 
 	def getMainHtml(self):
 		req = urllib2.Request(URL_MAIN)
 		req.add_header("Cookie",self.cookie)
 		ssosid = re.search(REGEX_COOKIE_SSOSID,self.cookie).group(1)
 		page = urllib2.urlopen(req,urllib.urlencode({'ACTION': 'TELEMTR','SSOSID': ssosid}))
-		self.cookie = re.search(REGEX_COOKIE,page.info()["Set-Cookie"]).group(1)
+		# there is a jsessionid sent, catch it for the overview
+		self.jsessionid = re.search(REGEX_COOKIE,page.info()["Set-Cookie"]).group(1)
 		return page.read()
 
 	def getOverviewHtml(self):
 		req = urllib2.Request(URL_OVERVIEW)
-		req.add_header("Cookie",self.cookie)
+		req.add_header("Cookie",self.jsessionid)
 		page = urllib2.urlopen(req)
 		return page.read()
 
@@ -125,11 +133,10 @@ class Telemeter:
 
 	def getVolumeUsed(self, procent):
 		if (procent == 1):
-	 		total = int(re.search(REGEX_MAIN_USED_TOTAL, self.htmlMain).group(1))
-			upload = int(re.search(REGEX_MAIN_USED_UPLOAD, self.htmlMain).group(1))
+	 		total = int(re.findall(REGEX_MAIN_USED, self.htmlMain)[0])
+			upload = int(re.findall(REGEX_MAIN_USED, self.htmlMain)[1])
 		else:
 			match = re.findall(REGEX_OVERVIEW_TOTALUSED, self.htmlOverview)
-
 			total = int(match[0])
 			upload = int(match[1])
 		return total, upload
