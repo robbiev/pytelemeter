@@ -17,7 +17,7 @@ import urllib2
 #import httplib
 #httplib.HTTPConnection.debuglevel = 1  
 
-VERSION = "0.9"
+VERSION = "0.9b"
 
 # config file
 configfile = os.environ['HOME'] + "/.pytelemeterrc"

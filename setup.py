@@ -11,7 +11,7 @@
 from distutils.core import setup
 
 setup(name="pytelemeter",
-      version="0.9",
+      version="0.9b",
       description="A small Python 'Telemeter' application to check out Telenet's download/upload statistics",
       author="Robbie Vanbrabant, Thomas Matthijs",
       author_email="climaxius@users.sourceforge.net, axxo-@users.sourceforge.net",
