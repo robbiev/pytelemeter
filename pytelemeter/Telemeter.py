@@ -60,12 +60,15 @@ class Telemeter:
 			for i in cook:
                                 self.cookie += i + " "
 
-		except IOError, (ignored,ignored,ignored,headers):
-			match = re.search(Constants.REGEX_ERROR,headers["Location"])
-			if (match):
-				fatalError("\nUnexpected error: " + match.group(1))
-			else:
-				fatalError("\nUnexpected error while fetching cookie")
+		except IOError, values:
+			for i in values:
+				print i
+				
+				#match = re.search(Constants.REGEX_ERROR,i)
+				#if match:
+				#	fatalError("\nUnexpected error: " + match.group(1))
+			#if not match:
+			#	fatalError("\nUnexpected error while fetching cookie")
 	def getMainHtml(self):
 		req = urllib2.Request(Constants.URL_MAIN)
 		req.add_header("Cookie",self.cookie)
