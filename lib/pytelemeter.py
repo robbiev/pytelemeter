@@ -60,15 +60,17 @@ class Telemeter:
                 if silent == 0:
                     sys.stdout.write("Fetching information... ")
                     sys.stdout.flush()
-		 
-		self.getCookie()
-		self.htmlMain = self.getMainHtml()
+		try:		 
+			self.getCookie()
+			self.htmlMain = self.getMainHtml()
 		
-		self.htmlOverview = self.getOverviewHtml()
+			self.htmlOverview = self.getOverviewHtml()
                 
-		if silent == 0:
-		    sys.stdout.write("done!\n")
-	
+			if silent == 0:
+		    		sys.stdout.write("done!\n")
+		except:
+			fatalError("\nUnexpected error! Maybe username and/or password incorrect?")
+
 	def getCookie(self):
 		try:
 			resp = urllib.URLopener().open(URL_LOGIN,urllib.urlencode({'goto': 'http://www.telenet.be/mijntelenet/index.php?content=https%3A%2F%2Fwww.telenet.be%2Fsys%2Fsso%2Fjump.php%3Fhttps%3A%2F%2Fservices.telenet.be%2Fisps%2FMainServlet%3FACTION%3DTELEMTR%26SSOSID%3D%24SSOSID%24','alt': '/mijntelenet/login.php','uid': self.username,'pwd': self.password}))
@@ -124,12 +126,37 @@ class Telemeter:
 		except ConfigParser.ParsingError:
 			fatalError("\nError parsing config file\n")
 		except:
-			fatalError("\nUnexpected error:" + sys.exc_info()[0])
+			fatalError("\nUnexpected error:" + str(sys.exc_info()[0]))
 			#If no expressions are present, raise re-raises the last expression that was active in the current scope
 			#allowing a caller to handle the exception as well
 			raise
 		if (self.username == 'foo' or self.password == 'bar'):
 			fatalError("\nEdit the configuration file first!\n")
+
+	def setConfig(self,user,passwd):
+		try:
+			config = ConfigParser.ConfigParser()
+			#config.read(configfile)
+			config.add_section("user")
+			config.set("user","user",user)
+			config.set("user","passwd",passwd)
+			file = open(configfile, 'w') 
+			config.write(file)
+			file.close()		
+              	except ConfigParser.NoSectionError:
+        	        fatalError("\nCheck if the sections needed exist in the config file.\n")
+		except ConfigParser.NoOptionError:
+                        fatalError("\nNot eneough sections found in config file\n")
+                except ConfigParser.MissingSectionHeaderError:
+                        fatalError("\nNo sections found in config file.\n")
+                except ConfigParser.ParsingError:
+                        fatalError("\nError parsing config file\n")
+                except: 
+                        fatalError("\nUnexpected error:" + str(sys.exc_info()[0]))
+                        #If no expressions are present, raise re-raises the last expression that was active in the current scope
+                        #allowing a caller to handle the exception as well
+                        raise
+
 
 	def getVolumeUsed(self, procent):
 		if (procent == 1):
