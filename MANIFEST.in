@@ -1,5 +1,5 @@
 include AUTHORS
-include CHANGELOG
+include CREDITS
 include COPYING
 include INSTALL
 include MANIFEST.in
@@ -8,6 +8,5 @@ include TODO
 include images/*
 include eggtray/*
 include scripts/*
-include lib/*.py
 include pytelemeterrc
 include setup.py
