@@ -17,7 +17,8 @@ def usage():
 	print "Opties:"
 	print "  -h\ttoon dit"
 	print "  -d\ttoon ook het dagoverzicht"
-	print "  -m\tbereken max aantal MiB dat je vandaag kan downloaden\n"
+	print "  -m\tbereken max aantal MiB dat je vandaag kan downloaden"
+        print "  -s\tstil zijn"
 
 def makeScale(perc,schaal):
 	if (perc > 100):
@@ -28,26 +29,31 @@ def makeScale(perc,schaal):
 	scale += " " * int(round(schaal - (aant * schaal/10)))
 	return scale
 
-def printStats(meter):
+def printStats(meter,silent):
 	totalMib,uploadMib = meter.getVolumeUsed(0)
 	totalProc,uploadProc = meter.getVolumeUsed(1)
 	
-	print "\nTelemeter statistics @ %s" % time.strftime("%d %b %Y",time.localtime(time.time()))
-	print "----------------------------------"
+        if silent == 0:
+	    print "\nTelemeter statistics @ %s" % time.strftime("%d %b %Y",time.localtime(time.time()))
+	    print "----------------------------------"
+    
 	print "%s [%s] %5s MiB (%s%%)" % ("Volume used: ", makeScale(totalProc, 20), totalMib, totalProc)
 	print "%s [%s] %5s MiB (%s%%)" % ("Upload used: ", makeScale(uploadProc, 20), uploadMib, uploadProc)
-	print ""
+        if silent == 0:
+        	print ""
 
-def printOverview(meter):
+def printOverview(meter,silent):
 	overview = meter.getOverview()
-	print "Telemeter dagoverzicht:"
-	print "-----------------------"
-	print "Dag      | Totaal | Upload"
+        if silent == 0:
+	    print "Telemeter dagoverzicht:"
+	    print "-----------------------"
+	    print "Dag      | Totaal | Upload"
 	for date,total,upload in overview:
 		print '%s | %6s | %6s' % (date,total,upload)
-	print ""
+        if silent == 0:
+        	print ""
 
-def printMaxDownload(meter):
+def printMaxDownload(meter,silent):
 	totalMax, uploadMax = meter.getVolumeMax()
 	overview = meter.getOverview()
 	totalMib,uploadMib = meter.getVolumeUsed(0)
@@ -64,11 +70,12 @@ def printMaxDownload(meter):
 		print "%s %i MiB. U gaat er terug onder op: %s" % ("U bent over uw limiet met", (uploadMib * uploadMax),meter.getDateBroad())
 	else:
 		print "%s %i %s" % ("U mag vandaag max",uploadMax - uploadMib + int(overview[0][2]),"MiB uploaden om niet over uw limiet te gaan.")
-	print ""
+        if silent == 0:
+        	print ""
 
 def main():
 	try:
-		o, a = getopt.getopt(sys.argv[1:], ":hdm")
+		o, a = getopt.getopt(sys.argv[1:], ":hdms")
 	except getopt.GetoptError:
 		usage()
 		sys.exit(2)
@@ -76,6 +83,7 @@ def main():
 	showDay = 0
 	showMax = 0
 	opts = {}
+        silent = 0
 	for k,v in o:
 		opts[k] = v
 	if opts.has_key('-h') or opts.has_key('--help'):
@@ -85,17 +93,19 @@ def main():
 		showDay = 1 
 	if opts.has_key("-m"):
 		showMax = 1
+        if opts.has_key("-s"):
+                silent = 1
 
 	meter = Telemeter()
 
-	meter.fetch()
+	meter.fetch(silent)
 
-	printStats(meter)
+	printStats(meter,silent)
 
 	if showMax == 1:
-		printMaxDownload(meter)
+		printMaxDownload(meter,silent)
 	if showDay == 1:
-		printOverview(meter)
+		printOverview(meter,silent)
 
 if __name__ == "__main__":
 	main()

@@ -46,18 +46,20 @@ class Telemeter:
 
 		self.cookie = ""
 		
-	def fetch(self):
+	def fetch(self,silent=0):
 		if (self.username == "" or self.password == ""):
 			self.checkConfig()
 			self.getConfig()
-
-		sys.stdout.write("Fetching information... ")
-		sys.stdout.flush()
+                if silent == 0:
+                    sys.stdout.write("Fetching information... ")
+                    sys.stdout.flush()
 		 
 		self.getCookie()
 		self.htmlMain = self.getMainHtml()
 		self.htmlOverview = self.getOverviewHtml()
-		sys.stdout.write("done!\n")
+
+                if silent == 0:
+		    sys.stdout.write("done!\n")
 	
 	def getCookie(self):
 		try:
