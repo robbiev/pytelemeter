@@ -1,6 +1,5 @@
 * improve the GUI (dockapp etc.)
 * make packages for easy install
-* test on Telenet duo, quattro, ...
 * improve execution speed
 * improve wrong username/password detection (knu)
 * cleanup html fetching (knu)
