@@ -37,8 +37,8 @@ def printStats(meter,silent):
 	    print "\nTelemeter statistics @ %s" % time.strftime("%d %b %Y",time.localtime(time.time()))
 	    print "----------------------------------"
     
-	print "%s [%s] %5s MB (%s%%)" % ("Volume used: ", makeScale(totalProc, 20), totalMib, totalProc)
-	print "%s [%s] %5s MB (%s%%)" % ("Upload used: ", makeScale(uploadProc, 20), uploadMib, uploadProc)
+	print "%s [%s] %5s MiB (%s%%)" % ("Volume used: ", makeScale(totalProc, 20), totalMib, totalProc)
+	print "%s [%s] %5s MiB (%s%%)" % ("Upload used: ", makeScale(uploadProc, 20), uploadMib, uploadProc)
         if silent == 0:
         	print ""
 
@@ -62,14 +62,14 @@ def printMaxDownload(meter,silent):
 	uploadMax = uploadMax*1024
 
 	if (totalMax <= uploadMib):
-		print "%s %i MB. Your connection will be restored on %s" % ("You exceeded the maximum volume allowed.", (totalMib - totalMax),meter.getDateBroad())
+		print "%s %i MiB. Your connection will be restored on %s" % ("You exceeded the maximum volume allowed.", (totalMib - totalMax),meter.getDateBroad())
 	else:
-		print "%s %i %s" % ("Today you can dowload",totalMax - totalMib + int(overview[0][1]),"MB without exceeding your download volume.")
+		print "%s %i %s" % ("Today you can dowload",totalMax - totalMib + int(overview[0][1]),"MiB without exceeding your download volume.")
 	
 	if (uploadMax <= uploadMib):
-		print "%s %i MB. Your connection will be restored on %s" % ("You exceeded the maximum volume allowed.", (uploadMib * uploadMax),meter.getDateBroad())
+		print "%s %i MiB. Your connection will be restored on %s" % ("You exceeded the maximum volume allowed.", (uploadMib * uploadMax),meter.getDateBroad())
 	else:
-		print "%s %i %s" % ("Today you can upload",uploadMax - uploadMib + int(overview[0][2]),"MB without exceeding your upload volume.")
+		print "%s %i %s" % ("Today you can upload",uploadMax - uploadMib + int(overview[0][2]),"MiB without exceeding your upload volume.")
         if silent == 0:
         	print ""
 
