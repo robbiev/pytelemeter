@@ -9,10 +9,9 @@
 import pygtk
 pygtk.require('2.0')
 import gtk
-from pytelemeter import Telemeter
-import sys
+from pytelemeter.Telemeter import Telemeter
 from pytelemeter import VERSION
-import string,datetime,time,random
+import sys,string,datetime,time,random
 
 class PyTeleGui:
 	def fillInfo(self, widget, data=None):

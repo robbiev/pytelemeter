@@ -6,9 +6,9 @@
 # See COPYING for info about the license (GNU GPL)
 # Check AUTHORS to see who wrote this software.
 
-from pytelemeter import Telemeter
-import getopt, sys, time
+from pytelemeter.Telemeter import Telemeter
 from pytelemeter import VERSION
+import getopt, sys, time
 
 def usage():
 	print "pytelemeter v%s" % VERSION

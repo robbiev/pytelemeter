@@ -9,14 +9,14 @@
 
 
 from distutils.core import setup
+from pytelemeter import VERSION
 
 setup(name="pytelemeter",
-      version="1.0",
+      version=VERSION,
       description="A small Python 'Telemeter' application to check out Telenet's download/upload statistics",
       author="Robbie Vanbrabant, Thomas Matthijs",
       author_email="climaxius@users.sourceforge.net, axxo-@users.sourceforge.net",
       url="http://pytelemeter.sourceforge.net",
-      py_modules=["pytelemeter"],
       scripts=['scripts/pytelemeter-cli', 'scripts/pytelemeter-gtk'],
-      package_dir = {'': 'lib'}
+      packages = ['pytelemeter']
 )
