@@ -1,7 +1,9 @@
 #!/usr/bin/python
-import pytelemeter
+#import pytelemeter
 import pytelemeter.pytrayicon
 import pygtk
+from pytelemeter.Telemeter import Telemeter
+from pytelemeter.GTK import PyTeleGui
 #pygtk.require('2.0')
 import gtk
 import os,sys
@@ -9,6 +11,9 @@ import os,sys
 class Tray:
     
 	def __init__(self, ):
+		
+		self.meter = Telemeter()	
+	
         	self.tray = pytelemeter.pytrayicon.TrayIcon("pytelemeter");
         	eventbox = gtk.EventBox()
         	self.tray.add(eventbox)
@@ -22,17 +27,22 @@ class Tray:
 		label = gtk.Label("P")
 		eventbox.add(label)
 		
-		tooltip = gtk.Tooltips()
-		tooltip.set_tip(self.tray,"Pytelemeter\nDouble click to open GTK interface\nRight click for options")
+		self.tooltip = gtk.Tooltips()
+
+		self.tooltip.set_tip(self.tray,"Pytelemeter\nDouble click to open GTK interface\nRight click for options")
 	
 		self.menu = gtk.Menu()
 
 		# Create the menu items
+		refresh_item = gtk.ImageMenuItem(stock_id=gtk.STOCK_REFRESH, accel_group=None)
 		open_item = gtk.ImageMenuItem(stock_id=gtk.STOCK_OPEN, accel_group=None)
 		quit_item = gtk.ImageMenuItem(stock_id=gtk.STOCK_QUIT, accel_group=None)
 		# Add them to the menu
+		self.menu.append(refresh_item)
 		self.menu.append(open_item)
 		self.menu.append(quit_item)
+
+		refresh_item.connect_object("activate", self.menuitem_response, "refresh")
 
 		# Attach the callback functions to the activate signal
 		open_item.connect_object("activate", self.menuitem_response, "open")
@@ -41,53 +51,44 @@ class Tray:
 		quit_item.connect_object ("activate", self.menuitem_response, "quit")
 
 		# We do need to show menu items
+		refresh_item.show()
 		open_item.show()
 		quit_item.show()
 
 
 		self.tray.show_all()
-#        self._tooltip = gtk.Tooltips()
-#        self.unread_count = 0
-#        self._feedlist = straw.FeedList.get_instance()
-#        for feed in self._feedlist.flatten_list():
-#            self.__add_feed(feed)
-
-
-#    def feed_added(self, signal):
-#        self.__add_feed(signal.feed)
-
-#    def __add_feed(self, feed):
-#        feed.signal_connect(straw.NewItemsSignal, self.update)
-#        feed.signal_connect(straw.ItemsAddedSignal, self.update)
-#        feed.signal_connect(straw.ItemReadSignal, self.update)
-#        feed.signal_connect(straw.ItemDeletedSignal, self.update)
-#        feed.signal_connect(straw.AllItemsReadSignal, self.update)
-
-   # def update(self,signal):
-   #     uritems = urfeeds = 0
-   #     for ur in [f.number_of_unread for f in self._feedlist.flatten_list()]:
-   #         if ur:
-   #             uritems += ur
-   #             urfeeds += 1
-   #     if uritems == self.unread_count:
-   #         return
-   #     self.unread_count = uritems
-   #     if uritems > 0:
-   #         self._tooltip.set_tip(self.tray, _("%d new items")%uritems)
    #         self.tray.show_all()
    #     else:
    #         self.tray.hide()
 
+	def cacheGTK(self):
+	       self.GUIGTK = PyTeleGui(1)
+	       self.GUIGTK.fillInfo(gtk.Button, 0, GUI.getMeter())
+
+	def showGTK(self):
+		self.cacheGTK()
+		self.GUIGTK.show()
+
+	def fillInfo(self):
+                self.meter.fetch()
+                totalMib,uploadMib = self.meter.getVolumeUsed(0)
+                totalProc,uploadProc = self.meter.getVolumeUsed(1)
+		tooltipString = "Total:\t%s%%\nUpload:\t%s%%\n\nDouble click to open GTK interface\nRight click for options" %(totalProc,uploadProc)
+		self.tooltip.set_tip(self.tray,tooltipString)
+
 	def menuitem_response(self, string):
 		if string == "open":
 			#open
-			os.system("pytelemeter-gtk")	
+		#	os.system("pytelemeter-gtk")
+			self.showGTK()	
 		elif string == "quit":
 			#quit
 			gtk.main_quit()
+		elif string == "refresh":
+			self.fillInfo()
+			self.showGTK
 
 	def clicked(self, signal, event):
-		#os.system("pytelemeter-gtk")	 
 		# which button was clicked?
   		if event.button == 1:
   			self.left_clicked(event)
@@ -96,30 +97,27 @@ class Tray:
   		elif event.button == 3:
    			self.right_clicked(event)
 
-  		# was it a multiple click?
-  		#if event.type == gtk.gdk.BUTTON_PRESS:
-   		#	print "single click"
-  		#elif event.type == gtk.gdk._2BUTTON_PRESS:
-   		#	print "double click"
-  		#elif event.type == gtk.gdk._3BUTTON_PRESS:
-   	#		print "triple click. ouch, you hurt your user."	
-
-
 	def left_clicked(self, event):
 		if event.type == gtk.gdk._2BUTTON_PRESS:
-			os.system("pytelemeter-gtk")
+			#os.system("pytelemeter-gtk")
+			self.showGTK()
 	def right_clicked(self, event):
 		if event.type == gtk.gdk.BUTTON_PRESS:
 			self.popup(event)
 
 	def popup(self, event):
    		self.menu.popup(None,None,None,event.button,event.time)
+
+	def getMeter(self):
+		return self.meter
 def main():
         gtk.main()
         return 0
 
 if __name__ == "__main__":
         GUI = Tray()
-        main()
+	GUI.fillInfo()
+	#GUI.cacheGTK()
+	main()
         sys.exit(0)
  

@@ -14,13 +14,14 @@ import urllib2
 import Constants
 from ConfigHandler import ConfigHandler
 from GlobalFunctions import fatalError
+from httplib import HTTPConnection
 
 class Telemeter:
 	def __init__(self,debug="false"):
 		if debug == "true":
 			# verbose debug
-			import httplib
-			httplib.HTTPConnection.debuglevel = 1  
+			#import httplib
+			HTTPConnection.debuglevel = 1  
 
 		config = ConfigHandler()
 		config.checkConfig()
