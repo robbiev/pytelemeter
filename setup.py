@@ -23,7 +23,7 @@ sys.path.insert(0, getoutput('pkg-config --variable=codegendir pygtk-2.0'))
 GLOBAL_MACROS+=[('GETTEXT_PACKAGE','"pytelemeter"')]
 	
 # Check for Python < 2.1
-if sys.version < '2.1':
+if sys.version < '2.2':
     sys.exit('Error: Python-2.2 or newer is required. Current version:\n %s'
              % sys.version)
 

@@ -1,6 +1,5 @@
-* improve the GUI (dockapp etc.)
+* improve the GUI 
 * make packages for easy install
-* improve execution speed
 * improve exception handling
 * improve wrong username/password detection (knu)
 * cleanup html fetching (knu)
