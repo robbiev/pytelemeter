@@ -1,11 +1,11 @@
 Start
 -----
 First, make sure you agree to all the terms stated in the COPYING file.
-Comments or suggestions go to Robbie Vanbrabant <robbie.vanbrabant@pandora.be>.
+Comments or suggestions go to Robbie Vanbrabant <climaxius@users.sourceforge.net>.
 
 What the..?
 -----------
-pytelemeter is a python script to check out Telenet's download/upload statistics.
+pytelemeter is a small Python "Telemeter" application to check out Telenet's download/upload statistics.
 
 Depends:
 --------

@@ -12,7 +12,7 @@ from pytelemeter import VERSION
 
 def usage():
 	print "\npytelemeter v%s door Robbie Vanbrabant" % VERSION
-	print "http://users.pandora.be/vanbrabant/robbie/soft/pytelemeter.html"
+	print "http://pytelemeter.sourceforge.net"
 	print "\nUsage: " + sys.argv[0] + " [options]"
 	print "Options:"
 	print "  -h\ttoon dit"
