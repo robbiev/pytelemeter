@@ -35,7 +35,7 @@ REGEX_OVERVIEW_DAYS = "<TR>[^<]+<TD class=\"(?:odd|even)\">[^0-9]+([0-9]{2}/[0-9
 REGEX_MAIN_USED = "<b>([0-9]+)%</b><br>"
 
 REGEX_MAIN_MAX = "Het toegelaten totaal volume op jouw product is[^<]+<b>[ ]*([0-9]+)[ ]*GB</b> per 30 dagen, waarvan[^<]+<b>[ ]*([,0-9]+)[ ]*GB</b> upstream"
-REGEX_MAIN_DATEBROAD = "Door overschrijding van uw toegelaten volume werd de snelheid van uw modem beperkt. Uw snelheid wordt automatisch hersteld op <b>[^0-9]+([0-9]{2}/[0-9]{2}/[0-9]{4})[^<]+</b>"
+REGEX_MAIN_DATEBROAD = "Door overschrijding van uw toegelaten volume werd de snelheid van uw modem beperkt. Uw snelheid wordt automatisch hersteld op<b>\n[\t]+([0-9]{2}/[0-9]{2}/[0-9]{4})"
 
 def fatalError(errormsg):
 	print errormsg
@@ -180,7 +180,7 @@ class Telemeter:
 		return totalMax, uploadMax
 
 	def getDateBroad(self):
-		#date you return to broadband
+		# date you return to broadband
 		date = re.search(REGEX_MAIN_DATEBROAD, self.htmlMain)
 		if date:
 			return date.group(1)
