@@ -13,8 +13,6 @@ setup(name="pytelemeter",
       author="Robbie Vanbrabant, Thomas Matthijs",
       author_email="climaxius@users.sourceforge.net, axxo-@users.sourceforge.net",
       url="http://pytelemeter.sourceforge.net",
-      data_files = [('/usr/share/locale/nl/LC_MESSAGES',['locale/nl/LC_MESSAGES/pytelemeter.mo']),
-      		    ('/usr/share/locale/en/LC_MESSAGES',['locale/en/LC_MESSAGES/pytelemeter.mo'])],
       py_modules=["pytelemeter"],
       scripts=['scripts/pytelemeter-cli', 'scripts/pytelemeter-gtk'],
       package_dir = {'': 'lib'}

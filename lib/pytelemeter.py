@@ -11,11 +11,6 @@ import re
 import urllib
 import urllib2
 
-#gettext
-import gettext
-t = gettext.translation('pytelemeter', '/usr/share/locale')
-_ = t.ugettext
-
 VERSION = "0.8"
 
 # configuratiebestand
@@ -56,14 +51,14 @@ class Telemeter:
 			self.checkConfig()
 			self.getConfig()
 		# "Fetching information" in nederlands? kan op niets beter komen :p
-		sys.stdout.write(_("Information aan het grijpen... "))
+		sys.stdout.write("Information aan het grijpen... ")
 		sys.stdout.flush()
 		 
 		self.getCookie()
 		self.htmlMain = self.getMainHtml()
 		self.htmlOverview = self.getOverviewHtml()
 		
-		print _("done!\n")
+		print "done!\n"
 
 	def getCookie(self):
 		try:
@@ -71,7 +66,7 @@ class Telemeter:
 		except IOError, (ignored,ignored,ignored,headers):
                         #find a better way!
                         if re.search(REGEX_FAILURE,headers["Location"]):
-                            fatalError(_("\nGebruikersnaam enof paswoord zijn niet correct"))
+                            fatalError("\nGebruikersnaam enof paswoord zijn niet correct")
 
 			cookies = headers["Set-Cookie"]
 			for i in re.findall(REGEX_COOKIE,cookies):
@@ -95,11 +90,11 @@ class Telemeter:
 		if os.path.isfile(configfile):
 			mode = os.stat(configfile).st_mode
 			if oct(mode & 0777) <> oct(0600 & 0777):
-				fatalError(	_("\nHet configuratiebestand MOET chmod 0600 staan om veiligheidsredenen\n") +
-						_("Huidige permissies: ") + oct(mode & 0777) +  "\n" +
-						_("\nVoer bijvoorbeeld uit: chmod 600 ~/.pytelemeterrc\n"))
+				fatalError(	"\nHet configuratiebestand MOET chmod 0600 staan om veiligheidsredenen\n" +
+						"Huidige permissies: " + oct(mode & 0777) +  "\n" +
+						"\nVoer bijvoorbeeld uit: chmod 600 ~/.pytelemeterrc\n")
 		else:
-			fatalError(_("\nHet configuratiebestand is niet gevonden\n"))
+			fatalError("\nHet configuratiebestand is niet gevonden\n")
 
 	def getConfig(self):
 		try:
@@ -108,22 +103,22 @@ class Telemeter:
 			self.username = config.get("user", "user")
 			self.password = config.get("user", "passwd")
 		except ConfigParser.NoSectionError:
-			fatalError(_("\nKijk of de nodige secties bestaan in het configuratiebestand.\n"))
+			fatalError("\nKijk of de nodige secties bestaan in het configuratiebestand.\n")
 		except ConfigParser.DuplicateSectionError:
-			fatalError(_("\nTwee dezelfde configuratiesecties gevonden\n"))
+			fatalError("\nTwee dezelfde configuratiesecties gevonden\n")
 		except ConfigParser.NoOptionError:
-			fatalError(_("\nNiet voldoende configuratieopties gevonden\n"))
+			fatalError("\nNiet voldoende configuratieopties gevonden\n")
 		except ConfigParser.MissingSectionHeaderError:
-			fatalError(_("\nGeen configuratiesecties in het bestand\n"))
+			fatalError("\nGeen configuratiesecties in het bestand\n")
 		except ConfigParser.ParsingError:
-			fatalError(_("\nKan configbestand niet parsen\n"))
+			fatalError("\nKan configbestand niet parsen\n")
 		except:
-			fatalError(_("\nUnexpected error:") + sys.exc_info()[0])
+			fatalError("\nUnexpected error:" + sys.exc_info()[0])
 			#If no expressions are present, raise re-raises the last expression that was active in the current scope
 			#allowing a caller to handle the exception as well
 			raise
 		if (self.username == 'foo' or self.password == 'bar'):
-			fatalError(_("\nEditeer het configuratiebestand eerst!\n"))
+			fatalError("\nEditeer het configuratiebestand eerst!\n")
 
 	def getVolumeUsed(self, procent):
 		if (procent == 1):
@@ -153,7 +148,7 @@ class Telemeter:
 		if date:
 			return date.group(1)
 		else:
-			return _("Niet over limiet")
+			return "Niet over limiet"
 
 if __name__ == "__main__":
-	fatalError(_("Run dit niet rechtstreeks"))
+	fatalError("Run dit niet rechtstreeks")

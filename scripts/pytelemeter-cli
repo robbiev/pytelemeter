@@ -10,22 +10,18 @@ from pytelemeter import Telemeter
 import getopt, sys
 from pytelemeter import VERSION
 
-#gettext
-import gettext
-gettext.install('pytelemeter', '/usr/share/locale')
-
 def usage():
 	print "\npytelemeter v%s" % VERSION
 	print "http://pytelemeter.sourceforge.net"
-	print _("\nGebruik: ") + sys.argv[0] + _(" [opties]")
-	print _("Opties:")
-	print _("  -h\ttoon dit")
-	print _("  -d\ttoon ook het dagoverzicht")
-	print _("  -m\tbereken max aantal MiB dat je vandaag kan downloaden\n")
+	print "\nGebruik: " + sys.argv[0] + " [opties]"
+	print "Opties:"
+	print "  -h\ttoon dit"
+	print "  -d\ttoon ook het dagoverzicht"
+	print "  -m\tbereken max aantal MiB dat je vandaag kan downloaden\n"
 
 def makeScale(perc,schaal):
 	if (perc > 100):
-		return _("Overschreden!!").center(20)
+		return "Overschreden!!".center(20)
 	scale = ""
 	aant = (float(perc)/schaal) * schaal/10
 	scale += "=" * int(round(aant * schaal/10))
@@ -36,17 +32,17 @@ def printStats(meter):
 	totalMib,uploadMib = meter.getVolumeUsed(0)
 	totalProc,uploadProc = meter.getVolumeUsed(1)
 	
-	print _("\nTelemeter statistieken:")
+	print "\nTelemeter statistieken:"
 	print "-----------------------"
-	print "%s [%s] %5s MiB (%s%%)" % (_("Volume verbruikt: "), makeScale(totalProc, 20), totalMib, totalProc)
-	print "%s [%s] %5s MiB (%s%%)" % (_("Upload verbruikt: "), makeScale(uploadProc, 20), uploadMib, totalProc)
+	print "%s [%s] %5s MiB (%s%%)" % ("Volume verbruikt: ", makeScale(totalProc, 20), totalMib, totalProc)
+	print "%s [%s] %5s MiB (%s%%)" % ("Upload verbruikt: ", makeScale(uploadProc, 20), uploadMib, totalProc)
 	print ""
 
 def printOverview(meter):
 	overview = meter.getOverview()
-	print _("Telemeter dagoverzicht:")
+	print "Telemeter dagoverzicht:"
 	print "-----------------------"
-	print _("Dag      | Totaal | Upload")
+	print "Dag      | Totaal | Upload"
 	for date,total,upload in overview:
 		print '%s | %6s | %6s' % (date,total,upload)
 	print ""
@@ -60,14 +56,14 @@ def printMaxDownload(meter):
 	uploadMax = uploadMax*1024
 
 	if (totalMax <= uploadMib):
-		print _("%s %i MiB. U gaat er terug onder op: %s") % (_("U bent over uw limiet met"), (totalMib - totalMax),meter.getDateBroad())
+		print "%s %i MiB. U gaat er terug onder op: %s" % ("U bent over uw limiet met", (totalMib - totalMax),meter.getDateBroad())
 	else:
-		print "%s %i %s" % (_("U mag vandaag max"),totalMax - totalMib + int(overview[0][1]),_("MiB downloaden om niet over uw limiet te gaan."))
+		print "%s %i %s" % ("U mag vandaag max",totalMax - totalMib + int(overview[0][1]),"MiB downloaden om niet over uw limiet te gaan.")
 	
 	if (uploadMax <= uploadMib):
-		print _("%s %i MiB. U gaat er terug onder op: %s") % (_("U bent over uw limiet met"), (uploadMib * uploadMax),meter.getDateBroad())
+		print "%s %i MiB. U gaat er terug onder op: %s" % ("U bent over uw limiet met", (uploadMib * uploadMax),meter.getDateBroad())
 	else:
-		print "%s %i %s" % (_("U mag vandaag max"),uploadMax - uploadMib + int(overview[0][2]),_("MiB uploaden om niet over uw limiet te gaan."))
+		print "%s %i %s" % ("U mag vandaag max",uploadMax - uploadMib + int(overview[0][2]),"MiB uploaden om niet over uw limiet te gaan.")
 	print ""
 
 def main():
