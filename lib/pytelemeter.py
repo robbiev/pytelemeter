@@ -50,7 +50,7 @@ class Telemeter:
 		if (self.username == "" or self.password == ""):
 			self.checkConfig()
 			self.getConfig()
-		# "Fetching information" in nederlands? kan op niets beter komen :p
+
 		sys.stdout.write("Fetching information... ")
 		sys.stdout.flush()
 		 

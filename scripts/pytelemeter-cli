@@ -9,6 +9,7 @@
 from pytelemeter import Telemeter
 import getopt, sys
 from pytelemeter import VERSION
+from datetime import date
 
 def usage():
 	print "\npytelemeter v%s" % VERSION
@@ -32,8 +33,8 @@ def printStats(meter):
 	totalMib,uploadMib = meter.getVolumeUsed(0)
 	totalProc,uploadProc = meter.getVolumeUsed(1)
 	
-	print "\nTelemeter statistieken:"
-	print "-----------------------"
+	print "\nTelemeter statistieken: (%s)" % date.today()
+	print "-------------------------------------"
 	print "%s [%s] %5s MiB (%s%%)" % ("Volume verbruikt: ", makeScale(totalProc, 20), totalMib, totalProc)
 	print "%s [%s] %5s MiB (%s%%)" % ("Upload verbruikt: ", makeScale(uploadProc, 20), uploadMib, totalProc)
 	print ""
