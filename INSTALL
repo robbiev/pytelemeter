@@ -1,7 +1,7 @@
 Start
 -----
 First, make sure you agree to all the terms stated in the COPYING file.
-Comments or suggestions go to Robbie Vanbrabant <climaxius@users.sourceforge.net>.
+Comments or suggestions go to Robbie Vanbrabant <climaxius@users.sourceforge.net> or Thomas Matthijs <axxo-@users.sourceforge.net>.
 
 What the..?
 -----------
@@ -16,22 +16,18 @@ PyGTK >= 2.0.0 (http://www.daa.com.au/~james/pygtk/)
 
 Installation
 ------------
-* You need to be root to install pytelemeter. If you don't have root, just copy all .py
-  files in the distribution into a dir and run in from that dir.
-* Installation is simple, just run as root (using sudo is even better, but this should always work):
+You need to be root to install pytelemeter. If you don't have root, just copy all .py files in the distribution into a dir and run it from that dir.
+Just run as root (using sudo is even better, but this should always work):
 
 python setup.py install
 
 Manual installation
 -------------------
 If the installation procedure with setup.py fails, you can try installing it manually.
-Note that if setup.py fails, you should file a bug report to me.
+Note that if setup.py fails, you should file a bug report to us.
 
 cp scripts/* /usr/local/bin
 cp lib/* /usr/lib/python2.2/site-packages/
-
-Why use setup.py if this is easy as well? Well, setup.py is the standard Python way of installing things,
-so this makes the lives of packagers easier. Use what you want.
 
 Setting up for use
 ------------------
