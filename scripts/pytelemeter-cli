@@ -1,0 +1,102 @@
+#!/usr/bin/env python
+#
+# pytelemeter CLI script 
+# Geeft download en upload statistieken van de Mijn Telenet pagina.
+# 
+# door Robbie Vanbrabant <robbie.vanbrabant@pandora.be>
+# alot of changes by Thomas M <knu@keanu.be>
+
+import pytelemeter
+import getopt, sys
+from pytelemeter import VERSION
+
+def usage():
+	print "\npytelemeter v%s door Robbie Vanbrabant" % VERSION
+	print "http://users.pandora.be/vanbrabant/robbie/soft/pytelemeter.html"
+	print "\nUsage: " + sys.argv[0] + " [options]"
+	print "Options:"
+	print "  -h\ttoon dit"
+	print "  -d\ttoon ook het dagoverzicht"
+	print "  -m\tbereken max aantal MiB dat je vandaag kan downloaden\n"
+
+def makeScale(perc,mb,schaal):
+	if (perc > 100):
+		return "   Overschreden!!   "
+        scale = ""
+	aant = (float(perc)/schaal) * schaal/10
+        for i in range(int(round(aant * schaal/10))):
+		scale += "="
+        for i in range(int(round(schaal - (aant * schaal/10)))):
+		scale += " " 
+	return scale
+
+def printStats():
+	totmb,upmb = pytelemeter.getVolumeUsed()
+	volumeTotaal,volumeUpload = pytelemeter.getVolumeUsedProcent()
+	
+	print "\nTelemeter statistieken:"
+	print "-----------------------"
+	print "%s [%s] %5s MiB (%s%%)" % ("Volume verbruikt: ", makeScale(volumeTotaal, totmb, 20), totmb, volumeTotaal)
+        print "%s [%s] %5s MiB (%s%%)" % ("Upload verbruikt: ", makeScale(volumeUpload, upmb, 20), upmb, volumeUpload)
+	sys.stdout.write("\n")
+
+def printDagOverzicht():
+	overzicht = pytelemeter.getOverzicht()
+	print "Telemeter dagoverzicht:"
+	print "-----------------------"
+	print "Dag      | Totaal | Upload"
+	for dag,totmb,upmb in overzicht:
+		print '%s | %6s | %6s' % (dag,totmb,upmb)
+	sys.stdout.write("\n")
+
+def printMaxDownload():
+	volumeDownMax, volumeUpMax = pytelemeter.getMaxVolume()
+	overzicht = pytelemeter.getOverzicht()
+	totmb,upmb = pytelemeter.getVolumeUsed()
+	
+	volumeDownMax = volumeDownMax*1024
+	volumeUpMax = volumeUpMax*1024
+
+	if (volumeDownMax <= totmb):
+		print "%s %i MiB. U gaat er terug onder op: %s" % ("U bent over uw limiet met", (totmb - volumeDownMax),pytelemeter.getDatumTerugBreedband())
+	else:
+		print "%s %i %s" % ("U mag vandaag max",volumeDownMax - totmb + int(overzicht[0][1]),"MiB downloaden om niet over uw limiet te gaan.")
+	
+	if (volumeUpMax <= upmb):
+		print "%s %i MiB. U gaat er terug onder op: %s" % ("U bent over uw limiet met", (upmb * volumeUpMax),pytelemeter.getDatumTerugBreedband())
+	else:
+		print "%s %i %s" % ("U mag vandaag max",volumeUpMax - upmb + int(overzicht[0][2]),"MiB uploaden om niet over uw limiet te gaan.")
+	sys.stdout.write("\n")
+
+def main():
+	try:
+        	o, a = getopt.getopt(sys.argv[1:], ":hdm")
+    	except getopt.GetoptError:
+        	usage()
+        	sys.exit(2)
+		
+	toonDag = 0
+	toonMax = 0
+	opts = {}
+	for k,v in o:
+		opts[k] = v
+	if opts.has_key('-h') or opts.has_key('--help'):
+		usage()
+		sys.exit()
+	if opts.has_key("-d"):
+		toonDag = 1 
+	if  opts.has_key("-m"):
+		toonMax = 1
+
+	pytelemeter.main()
+
+	printStats()
+
+	if toonMax == 1:
+		printMaxDownload()
+	if toonDag == 1:
+		printDagOverzicht()	
+
+if __name__ == "__main__":
+	main()
+	sys.exit(0)

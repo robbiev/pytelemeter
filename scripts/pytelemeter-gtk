@@ -1,0 +1,110 @@
+#!/usr/bin/env python
+#
+# pytelemeter GTK interface
+# Geeft download en upload statistieken van de Mijn Telenet pagina.
+#
+# door Robbie Vanbrabant <robbie.vanbrabant@pandora.be>
+#
+
+import gtk
+import pytelemeter
+import sys
+from pytelemeter import VERSION
+
+class PyTeleGui:
+	def fillInfo(self, widget, data=None):
+		sys.stdout.write('Fetching information ... ')
+		sys.stdout.flush()
+		pytelemeter.main()
+		a,b = pytelemeter.getVolumeUsedProcent()
+		sys.stdout.write('done!\n')
+		dval = float(int(a))/100
+	        uval = float(int(b))/100
+       		self.dbar.set_fraction(dval)
+        	self.ubar.set_fraction(uval)
+        	self.dbar.set_text(str(a) + "%")
+        	self.ubar.set_text(str(b) + "%")
+		self.window.show()
+		
+	def delete_event(self, widget, event, data=None):
+        	gtk.main_quit()
+        	return gtk.FALSE
+
+	def __init__(self):
+        	# Create a new window
+        	self.window = gtk.Window(gtk.WINDOW_TOPLEVEL)
+		self.window.set_resizable(gtk.FALSE)
+        	self.window.set_position(gtk.WIN_POS_CENTER)
+		# Set the window title
+        	self.window.set_title("pytelemeter v" + VERSION)
+
+        	# Set a handler for delete_event that immediately
+        	# exits GTK.
+        	self.window.connect("delete_event", self.delete_event)
+
+        	# Sets the border width of the window.
+        	self.window.set_border_width(5)
+        	
+		# Create a 2x2 table
+        	table = gtk.Table(4, 2, gtk.FALSE)
+
+        	# Put the table in the main window
+        	self.window.add(table)
+	
+		# TODO zelf toegevoegd
+		labeld = gtk.Label("Download")
+		labelu = gtk.Label("Upload")
+		#labeld.set_justify(gtk.JUSTIFY_LEFT)
+		#labelu.set_justify(gtk.JUSTIFY_LEFT)
+		#labeld.set_alignment(1, 0)
+		#labelu.set_alignment(0, 1) 
+        	table.attach(labeld, 0, 1, 0, 1, xoptions=gtk.FILL, yoptions=gtk.FILL, xpadding=5, ypadding=5)
+		labeld.show()
+		table.attach(labelu, 0, 1, 1, 2, xoptions=gtk.FILL, yoptions=gtk.FILL, xpadding=5, ypadding=5)
+        	labelu.show()
+
+		# progress bars
+		self.dbar = gtk.ProgressBar()
+		table.attach(self.dbar, 1, 2, 0, 1,xoptions=gtk.FILL, yoptions=gtk.FILL, xpadding=5, ypadding=5)
+		self.dbar.show()
+	
+        	self.ubar = gtk.ProgressBar()
+		table.attach(self.ubar, 1, 2, 1, 2,xoptions=gtk.FILL, yoptions=gtk.FILL, xpadding=5, ypadding=5)
+		self.ubar.show()
+
+		# hline
+		separator = gtk.HSeparator()
+		table.attach(separator, 0, 2, 2, 3,xoptions=gtk.FILL, yoptions=gtk.FILL, xpadding=5, ypadding=5)
+		separator.show()
+
+		# tabelletje voor knoppen
+		table2 = gtk.Table(1, 2, gtk.FALSE)
+		
+		# Add a button to exit the program
+        	button = gtk.Button("Sluiten")
+        	button.connect("clicked", gtk.mainquit)
+        	table2.attach(button, 1, 2, 0, 1,xoptions=gtk.EXPAND|gtk.FILL, yoptions=gtk.EXPAND|gtk.FILL, xpadding=5, ypadding=3)
+        	button.show()
+
+		# knop voor te refreshen
+		button2 = gtk.Button("Vernieuw")
+        	button2.connect("clicked", self.fillInfo)
+        	table2.attach(button2, 0, 1, 0, 1,xoptions=gtk.EXPAND|gtk.FILL, yoptions=gtk.EXPAND|gtk.FILL, xpadding=5, ypadding=3)
+        	button2.show()
+
+		table.attach(table2, 0, 2, 3, 4,xoptions=gtk.EXPAND|gtk.FILL, yoptions=gtk.EXPAND|gtk.FILL, xpadding=0, ypadding=0)
+	
+		# alles tonen
+		table.show()
+		table2.show()
+        	#self.window.show()
+
+def main():
+	gtk.main()
+	return 0       
+
+if __name__ == "__main__":
+	GUI = PyTeleGui()
+	GUI.fillInfo(gtk.Button, None)
+	main()
+	sys.exit(0)
