@@ -45,3 +45,8 @@ cp pytelemeterrc ~/.pytelemeterrc
 chmod 600 ~/.pytelemeterrc
 
 * Now run pytelemeter-gtk or pytelemeter-cli (add -h to view options).
+
+FAQ
+---
+Q: I can't install pytelemeter on my Debian system, I get an "ImportError: No module named distutils.core" error!
+A: Install the python-dev package.
