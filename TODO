@@ -3,5 +3,7 @@
 * support other languages (gettext)
 * test on Telenet duo, quattro, ...
 * improve execution speed
+* improve wrong username/password detection (knu)
+* cleanup html fetching (knu)
 
-Feel free to suggest other features to <climaxius@users.sourceforge.net>
+Feel free to suggest other features to <climaxius@users.sourceforge.net> or <axxo-@users.sourceforge.net>

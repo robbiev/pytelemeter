@@ -13,8 +13,6 @@ Python >= 2.2.x (http://www.python.org)
 	(If it works with older versions of Python, let me know)
 PyGTK >= 2.0.0 (http://www.daa.com.au/~james/pygtk/)
 	(Only if you want to use the GTK interface)
-ClientCookie >= 0.4.13 (http://wwwsearch.sourceforge.net/ClientCookie/)
-	(Older versions of ClientCookie <= 0.4.9 could work, but are no longer supported)
 
 Installation
 ------------
