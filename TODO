@@ -3,37 +3,8 @@
 * fix refresh behavior between GTK and Tray
 * add some sommand line options to the GTK/Tray scripts
 * setup improvents (automatic settings configuration script, check for certain modules)
-* fix bdist_rpm (and perhaps others?)
 * show all cli output in other scripts too
 * clean up GTK code
 * verify build and run depends
-
-Fetching information... Traceback (most recent call last):
-  File "./pytelemeter-tray", line 137, in ?
-    GUI.fillInfo()
-  File "./pytelemeter-tray", line 91, in fillInfo
-    self.meter.fetch()
-  File "/usr/lib/python2.3/site-packages/pytelemeter/Telemeter.py", line 47, in fetch
-    self.htmlOverview = self.getOverviewHtml()
-  File "/usr/lib/python2.3/site-packages/pytelemeter/Telemeter.py", line 102, in getOverviewHtml
-    page = urllib2.urlopen(req)
-  File "/usr/lib/python2.3/urllib2.py", line 129, in urlopen
-    return _opener.open(url, data)
-  File "/usr/lib/python2.3/urllib2.py", line 326, in open
-    '_open', req)
-  File "/usr/lib/python2.3/urllib2.py", line 306, in _call_chain
-    result = func(*args)
-  File "/usr/lib/python2.3/urllib2.py", line 908, in https_open
-    return self.do_open(httplib.HTTPS, req)
-  File "/usr/lib/python2.3/urllib2.py", line 895, in do_open
-    return self.parent.error('http', req, fp, code, msg, hdrs)
-  File "/usr/lib/python2.3/urllib2.py", line 352, in error
-    return self._call_chain(*args)
-  File "/usr/lib/python2.3/urllib2.py", line 306, in _call_chain
-    result = func(*args)
-  File "/usr/lib/python2.3/urllib2.py", line 412, in http_error_default
-    raise HTTPError(req.get_full_url(), code, msg, hdrs, fp)
-urllib2.HTTPError: HTTP Error 500: Internal Server Error
-
 
 Feel free to suggest other features to <pytelemeter-support@lists.sourceforge.net>

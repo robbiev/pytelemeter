@@ -59,6 +59,9 @@ class Telemeter:
 			for i in cook:
                                 self.cookie += i + " "
 
+		except urllib2.HTTPError, inst:
+			fatalError("\nUnexpected http error: " + str(inst.code))
+
 		except IOError, inst:
 			
 			errorStr = ""
@@ -88,19 +91,85 @@ class Telemeter:
 				fatalError("\nUnexpected error: "+errorStr)	
 	
 	def getMainHtml(self):
-		req = urllib2.Request(Constants.URL_MAIN)
-		req.add_header("Cookie",self.cookie)
-		ssosid = re.search(Constants.REGEX_COOKIE_SSOSID,self.cookie).group(1)
-		page = urllib2.urlopen(req,urllib.urlencode({'ACTION': 'TELEMTR','SSOSID': ssosid}))
-		# there is a jsessionid sent, catch it for the overview
-		self.jsessionid = re.search(Constants.REGEX_COOKIE,page.info()["Set-Cookie"]).group(1)
-		return page.read()
+		try:
+			req = urllib2.Request(Constants.URL_MAIN)
+			req.add_header("Cookie",self.cookie)
+			ssosid = re.search(Constants.REGEX_COOKIE_SSOSID,self.cookie).group(1)
+			page = urllib2.urlopen(req,urllib.urlencode({'ACTION': 'TELEMTR','SSOSID': ssosid}))
+			# there is a jsessionid sent, catch it for the overview
+			self.jsessionid = re.search(Constants.REGEX_COOKIE,page.info()["Set-Cookie"]).group(1)
+			return page.read()
+
+                except urllib2.HTTPError, inst:
+                        fatalError("\nUnexpected http error: " + str(inst.code))
+
+                except IOError, inst:
+                        
+                        errorStr = ""
+                        if len(inst.args) >= 2:
+                                errorStr = inst.args[0] + " " + str(inst.args[1])
+                        else:
+                                errorStr = "IOError"
+                        
+                        foundHTTPMessage = False
+                        for arg in inst:
+                                if isinstance(arg,httplib.HTTPMessage):
+                                        if arg.has_key("location"):
+                                                header = arg.getheaders("location")
+                                                match = re.search(Constants.REGEX_ERROR,str(header))
+                                                if match:
+                                                        failString = match.group(1)
+                                                        if failString == "sso.login.authfail.PasswordNOK":
+                                                                errorStr += " => incorrect password"
+                                                        elif failString == "sso.login.authfail.LoginDoesNotExist":
+                                                                errorStr += " => incorrect login"
+                                                        else:
+                                                                errorStr += " => "
+                                                                errorStr += failString
+                                                        fatalError("\nUnexpected error: "+errorStr)
+                                                        foundHTTPMessage = True
+                        if foundHTTPMessage == False:
+                                fatalError("\nUnexpected error: "+errorStr)
+
 
 	def getOverviewHtml(self):
-		req = urllib2.Request(Constants.URL_OVERVIEW)
-		req.add_header("Cookie",self.jsessionid)
-		page = urllib2.urlopen(req)
-		return page.read()
+		try:
+			req = urllib2.Request(Constants.URL_OVERVIEW)
+			req.add_header("Cookie",self.jsessionid)
+			page = urllib2.urlopen(req)
+			return page.read()
+
+                except urllib2.HTTPError, inst:
+                        fatalError("\nUnexpected http error: " + str(inst.code))
+
+                except IOError, inst:
+                        
+                        errorStr = ""
+                        if len(inst.args) >= 2:
+                                errorStr = inst.args[0] + " " + str(inst.args[1])
+                        else:
+                                errorStr = "IOError"
+                        
+                        foundHTTPMessage = False
+                        for arg in inst:
+                                if isinstance(arg,httplib.HTTPMessage):
+                                        if arg.has_key("location"):
+                                                header = arg.getheaders("location")
+                                                match = re.search(Constants.REGEX_ERROR,str(header))
+                                                if match:
+                                                        failString = match.group(1)
+                                                        if failString == "sso.login.authfail.PasswordNOK":
+                                                                errorStr += " => incorrect password"
+                                                        elif failString == "sso.login.authfail.LoginDoesNotExist":
+                                                                errorStr += " => incorrect login"
+                                                        else:
+                                                                errorStr += " => "
+                                                                errorStr += failString
+                                                        fatalError("\nUnexpected error: "+errorStr)
+                                                        foundHTTPMessage = True
+                        if foundHTTPMessage == False:
+                                fatalError("\nUnexpected error: "+errorStr)
+
 
 	def getVolumeUsed(self, procent):
 		if (procent == 1):

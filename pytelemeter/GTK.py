@@ -33,17 +33,14 @@ class PyTeleGui:
 		if self.meter == None:
 			if externalMeter == None:
 				self.meter = Telemeter()
-				print "eigen meter"
 			else:
 				self.meter = externalMeter
-				print "andere meter"
 		if str(self.eu.get_text()) != "" and str(self.ep.get_text()) != "":
                         self.meter.username = self.eu.get_text()
                         self.meter.password = self.ep.get_text()
                         self.config.setConfig(str(self.eu.get_text()),str(self.ep.get_text()))
 		#try:
 		if fetchAgain == 1:
-			print "fetcheu"
 			self.meter.fetch()
 		a,b = self.meter.getVolumeUsed(1)
 		dval = float(int(a))/100

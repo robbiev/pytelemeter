@@ -23,6 +23,7 @@ except AssertionError:
 import pytelemeter.pytrayicon
 from pytelemeter.Telemeter import Telemeter
 from pytelemeter.GTK import PyTeleGui
+from pytelemeter import VERSION
 import os,sys
 
 class Tray:
@@ -38,7 +39,7 @@ class Tray:
 
         	image = gtk.Image()
         	pixbuf = gtk.gdk.pixbuf_new_from_file("/usr/share/pixmaps/pytele.png")
-        	scaled_buf = pixbuf.scale_simple(16,16,gtk.gdk.INTERP_BILINEAR)
+        	scaled_buf = pixbuf.scale_simple(24,24,gtk.gdk.INTERP_BILINEAR)
         	image.set_from_pixbuf(scaled_buf)
         	eventbox.add(image)
 		
@@ -47,7 +48,7 @@ class Tray:
 		
 		self.tooltip = gtk.Tooltips()
 
-		self.tooltip.set_tip(self.tray,"Pytelemeter\nDouble click to open GTK interface\nRight click for options")
+		self.tooltip.set_tip(self.tray,"Pytelemeter v%s\nDouble click to open GTK interface\nRight click for options" %(VERSION))
 	
 		self.menu = gtk.Menu()
 
@@ -91,7 +92,7 @@ class Tray:
                 self.meter.fetch()
                 totalMib,uploadMib = self.meter.getVolumeUsed(0)
                 totalProc,uploadProc = self.meter.getVolumeUsed(1)
-		tooltipString = "Total:\t%s%%\nUpload:\t%s%%\n\nDouble click to open GTK interface\nRight click for options" %(totalProc,uploadProc)
+		tooltipString = "Total:\t%s%% (%s MiB)\nUpload:\t%s%% (%s MiB)\n\nPytelemeter v%s" %(totalProc,totalMib,uploadProc,uploadMib,VERSION)
 		self.tooltip.set_tip(self.tray,tooltipString)
 
 	def menuitem_response(self, string):
