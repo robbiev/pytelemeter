@@ -5,10 +5,11 @@
 # en Thomas Matthijs <knu@keanu.be>  ;-)
 
 import sys
-import ClientCookie
 import ConfigParser
 import os
 import re
+import urllib
+import urllib2
 
 #gettext
 import gettext
@@ -20,16 +21,13 @@ VERSION = "0.8"
 # configuratiebestand
 configfile = os.environ['HOME'] + "/.pytelemeterrc"
 
-
-URL_FIRST = "https://www.telenet.be/sys/sso/exec_login.php"
-URL_FIRST_DATA = "uid=%s&pwd=%s&goto=http%%3A%%2F%%2Fwww.telenet.be"
-URL_MAIN = "https://www.telenet.be/sys/sso/jump.php?https://services.telenet.be/isps/MainServlet?ACTION=TELEMTR&SSOSID=%s"
-URL_OVERVIEW = "https://services.telenet.be/isps/be/telenet/ebiz/ium/Histogram.jsp" 
-
-
-REGEX_FIRST_SSOSID = "<!-- SSOSID => ([^ ]+) -->"
-
-
+URL_LOGIN = "https://www.telenet.be/sys/sso/exec_login.php"
+URL_MAIN = "https://services.telenet.be/isps/MainServlet"
+URL_OVERVIEW = "https://services.telenet.be/isps/be/telenet/ebiz/ium/Histogram.jsp"
+REGEX_COOKIE = "([A-Z]+=[^;]+;)"
+REGEX_COOKIE_SSOSID = "SSOSID=([^;]+);"
+ 
+REGEX_FAILURE = "Authenticatie niet gelukt"
 REGEX_OVERVIEW_TOTALUSED = "(?s)<(?:TD class=\"header\" align=\"right\"*)>(.*?) MB</TD>"
 REGEX_OVERVIEW_DAYS = "<TR>[^<]+<TD class=\"(?:odd|even)\">[^0-9]+([0-9]{2}/[0-9]{2}/[0-9]{2})[^<]+</TD>[^<]+<TD class=\"(?:odd|even)\" align=\"right\">[^0-9]+([0-9]+)[^<]+</TD>[^<]+<TD class=\"(?:odd|even)\" align=\"right\">[^0-9]+([0-9]+)[^<]+</TD>[^<]+</TR>"
 REGEX_MAIN_USED_TOTAL = "Totaal verbruikt volume \(downstream \+ upstream\)</a>[^<]+<b>([0-9]+)%</b><br>"
@@ -49,6 +47,8 @@ class Telemeter:
 
 		self.htmlMain = ""
 		self.htmlOverview = ""
+
+		self.cookie = ""
 		
 	def fetch(self):
 		if (self.username == "" or self.password == ""):
@@ -58,17 +58,38 @@ class Telemeter:
 		sys.stdout.write(_("Information aan het grijpen... "))
 		sys.stdout.flush()
 		 
-		# lets get a cookie first, so hungry
-		htmlFirst = self.getHtml(URL_FIRST, URL_FIRST_DATA % (self.username, self.password))
-		# we also need the SSOSID  from that page
-		ssosid = re.search(REGEX_FIRST_SSOSID, htmlFirst).group(1)
-		# get the main page
-		self.htmlMain = self.getHtml(URL_MAIN % ssosid)
-		# get the overview page
-		self.htmlOverview = self.getHtml(URL_OVERVIEW)
+		self.getCookie()
+		self.htmlMain = self.getMainHtml()
+		self.htmlOverview = self.getOverviewHtml()
 		
 		print _("done!\n")
-		
+
+	def getCookie(self):
+		try:
+			urllib.URLopener().open(URL_LOGIN,urllib.urlencode({'goto': 'www.telenet.be','alt': '/mijntelenet/login.php','uid': self.username,'pwd': self.password}))
+		except IOError, (ignored,ignored,ignored,headers):
+                        #find a better way!
+                        if re.search(REGEX_FAILURE,headers["Location"]):
+                            fatalError(_("\nGebruikersnaam enof paswoord zijn niet correct"))
+
+			cookies = headers["Set-Cookie"]
+			for i in re.findall(REGEX_COOKIE,cookies):
+				self.cookie += i + " "
+
+	def getMainHtml(self):
+		req = urllib2.Request(URL_MAIN)
+		req.add_header("Cookie",self.cookie)
+		ssosid = re.search(REGEX_COOKIE_SSOSID,self.cookie).group(1)
+		page = urllib2.urlopen(req,urllib.urlencode({'ACTION': 'TELEMTR','SSOSID': ssosid}))
+		self.cookie = re.search(REGEX_COOKIE,page.info()["Set-Cookie"]).group(1)
+		return page.read()
+
+	def getOverviewHtml(self):
+		req = urllib2.Request(URL_OVERVIEW)
+		req.add_header("Cookie",self.cookie)
+		page = urllib2.urlopen(req)
+		return page.read()
+
 	def checkConfig(self):
 		if os.path.isfile(configfile):
 			mode = os.stat(configfile).st_mode
@@ -102,17 +123,6 @@ class Telemeter:
 			raise
 		if (self.username == 'foo' or self.password == 'bar'):
 			fatalError(_("\nEditeer het configuratiebestand eerst!\n"))
-
-	def getHtml(self, url, data=""):
-		try:
-			if data != "":
-				page = ClientCookie.urlopen(url, data)
-			else: 
-				page = ClientCookie.urlopen(url)
-		except IOError, e:
-			fatalError(_("Fout bij het openen van de Telemeter pagina: %s") %e)
-
-		return page.read()
 
 	def getVolumeUsed(self, procent):
 		if (procent == 1):
