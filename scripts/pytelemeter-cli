@@ -11,7 +11,7 @@ import getopt, sys, time
 from pytelemeter import VERSION
 
 def usage():
-	print "\npytelemeter v%s" % VERSION
+	print "pytelemeter v%s" % VERSION
 	print "http://pytelemeter.sourceforge.net"
 	print "\nUsage: " + sys.argv[0] + " [options]"
 	print "Options:"

@@ -13,7 +13,7 @@ import re
 import urllib
 import urllib2
 
-VERSION = "0.8"
+VERSION = "0.9"
 
 # config file
 configfile = os.environ['HOME'] + "/.pytelemeterrc"
