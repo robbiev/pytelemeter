@@ -255,7 +255,9 @@ class PyTeleGui:
                 button.show()
 
 		button = gtk.Button(stock=gtk.STOCK_QUIT)
-        	button.connect("clicked", gtk.mainquit)
+		# gtk.mainquit vs gtk.main_quit
+        	# http://www.daa.com.au/pipermail/pygtk/2004-March/007142.html
+		button.connect("clicked", lambda w: gtk.main_quit())
         	Maintable.attach(button, 1,2,0,1, xpadding=5, ypadding=5)
        		button.show()
 

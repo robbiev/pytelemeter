@@ -1,7 +1,8 @@
 * improve the GUI (dockapp etc.)
 * make packages for easy install
 * improve execution speed
+* improve exception handling
 * improve wrong username/password detection (knu)
 * cleanup html fetching (knu)
 
-Feel free to suggest other features to <climaxius@users.sourceforge.net> or <axxo-@users.sourceforge.net>
+Feel free to suggest other features to <pytelemeter-support@lists.sourceforge.net>

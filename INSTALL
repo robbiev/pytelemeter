@@ -46,3 +46,6 @@ FAQ
 ---
 Q: I can't install pytelemeter on my Debian system, I get an "ImportError: No module named distutils.core" error!
 A: Install the python-dev package.
+
+Q: I can't run pytelemeter-gtk, I get a "RuntimeError: could not open display" error!
+A: Set your DISPLAY environment variable, usually this means: export DISPLAY=:0 (when this faq item occurs, mail us).
