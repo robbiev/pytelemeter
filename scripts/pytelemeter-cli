@@ -63,12 +63,12 @@ def printMaxDownload(meter,silent):
 
 
 	if (totalMax <= totalMib):
-		print "You exceeded the maximum volume allowed with %i MiB. Your connection will be restored on %s" % ( (totalMib - totalMax), meter.getDateBroad() )
+		print "Exceeded maximum allowed volume by %i MiB. Your connection will be restored on %s" % ( (totalMib - totalMax), meter.getDateBroad() )
 	else:
 		print "Today you can download %i MiB without exceeding your download volume." % (totalMax - totalMib + int(overview[0][1]))
 	
 	if (uploadMax <= uploadMib):
-		print "You exceeded the maximum volume allowed with %i MiB. Your connection will be restored on %s" % ( (uploadMib * uploadMax), meter.getDateBroad() )
+		print "You exceeded the maximum allowed volume by %i MiB. Your connection will be restored on %s" % ( (uploadMib * uploadMax), meter.getDateBroad() )
 	else:
 		print "Today you can upload %i MiB without exceeding your upload volume." % (uploadMax - uploadMib + int(overview[0][2]) )
         if silent == 0:
