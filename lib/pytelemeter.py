@@ -51,15 +51,14 @@ class Telemeter:
 			self.checkConfig()
 			self.getConfig()
 		# "Fetching information" in nederlands? kan op niets beter komen :p
-		sys.stdout.write("Information aan het grijpen... ")
+		sys.stdout.write("Fetching information... ")
 		sys.stdout.flush()
 		 
 		self.getCookie()
 		self.htmlMain = self.getMainHtml()
 		self.htmlOverview = self.getOverviewHtml()
-		
-		print "done!\n"
-
+		sys.stdout.write("done!\n")
+	
 	def getCookie(self):
 		try:
 			urllib.URLopener().open(URL_LOGIN,urllib.urlencode({'goto': 'www.telenet.be','alt': '/mijntelenet/login.php','uid': self.username,'pwd': self.password}))
