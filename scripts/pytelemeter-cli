@@ -13,16 +13,16 @@ from pytelemeter import VERSION
 def usage():
 	print "\npytelemeter v%s" % VERSION
 	print "http://pytelemeter.sourceforge.net"
-	print "\nGebruik: " + sys.argv[0] + " [opties]"
-	print "Opties:"
-	print "  -h\ttoon dit"
-	print "  -d\ttoon ook het dagoverzicht"
-	print "  -m\tbereken max aantal MiB dat je vandaag kan downloaden"
-        print "  -s\tstil zijn"
+	print "\nUsage: " + sys.argv[0] + " [options]"
+	print "Options:"
+	print "  -h\tshow this message"
+	print "  -d\tshow daily statistics"
+	print "  -m\tcalculate volume left"
+        print "  -s\tsilent mode"
 
 def makeScale(perc,schaal):
 	if (perc > 100):
-		return "Overschreden!!".center(20)
+		return "Exceeded!".center(20)
 	scale = ""
 	aant = (float(perc)/schaal) * schaal/10
 	scale += "=" * int(round(aant * schaal/10))
@@ -37,17 +37,17 @@ def printStats(meter,silent):
 	    print "\nTelemeter statistics @ %s" % time.strftime("%d %b %Y",time.localtime(time.time()))
 	    print "----------------------------------"
     
-	print "%s [%s] %5s MiB (%s%%)" % ("Volume used: ", makeScale(totalProc, 20), totalMib, totalProc)
-	print "%s [%s] %5s MiB (%s%%)" % ("Upload used: ", makeScale(uploadProc, 20), uploadMib, uploadProc)
+	print "%s [%s] %5s MB (%s%%)" % ("Volume used: ", makeScale(totalProc, 20), totalMib, totalProc)
+	print "%s [%s] %5s MB (%s%%)" % ("Upload used: ", makeScale(uploadProc, 20), uploadMib, uploadProc)
         if silent == 0:
         	print ""
 
 def printOverview(meter,silent):
 	overview = meter.getOverview()
         if silent == 0:
-	    print "Telemeter dagoverzicht:"
-	    print "-----------------------"
-	    print "Dag      | Totaal | Upload"
+	    print "Daily statistics:"
+	    print "-----------------"
+	    print "Day      | Total  | Upload"
 	for date,total,upload in overview:
 		print '%s | %6s | %6s' % (date,total,upload)
         if silent == 0:
@@ -62,14 +62,14 @@ def printMaxDownload(meter,silent):
 	uploadMax = uploadMax*1024
 
 	if (totalMax <= uploadMib):
-		print "%s %i MiB. U gaat er terug onder op: %s" % ("U bent over uw limiet met", (totalMib - totalMax),meter.getDateBroad())
+		print "%s %i MB. Your connection will be restored on %s" % ("You exceeded the maximum volume allowed.", (totalMib - totalMax),meter.getDateBroad())
 	else:
-		print "%s %i %s" % ("U mag vandaag max",totalMax - totalMib + int(overview[0][1]),"MiB downloaden om niet over uw limiet te gaan.")
+		print "%s %i %s" % ("Today you can dowload",totalMax - totalMib + int(overview[0][1]),"MB without exceeding your download volume.")
 	
 	if (uploadMax <= uploadMib):
-		print "%s %i MiB. U gaat er terug onder op: %s" % ("U bent over uw limiet met", (uploadMib * uploadMax),meter.getDateBroad())
+		print "%s %i MB. Your connection will be restored on %s" % ("You exceeded the maximum volume allowed.", (uploadMib * uploadMax),meter.getDateBroad())
 	else:
-		print "%s %i %s" % ("U mag vandaag max",uploadMax - uploadMib + int(overview[0][2]),"MiB uploaden om niet over uw limiet te gaan.")
+		print "%s %i %s" % ("Today you can upload",uploadMax - uploadMib + int(overview[0][2]),"MB without exceeding your upload volume.")
         if silent == 0:
         	print ""
 
