@@ -1,6 +1,5 @@
 * improve the GUI (dockapp etc.)
 * make packages for easy install
-* support other languages (gettext)
 * test on Telenet duo, quattro, ...
 * improve execution speed
 * improve wrong username/password detection (knu)
