@@ -21,5 +21,7 @@ REGEX_MAIN_USED = "<b>([0-9]+)%</b><br>"
 REGEX_MAIN_MAX = "Het toegelaten totaal volume op jouw product is[^<]+<b>[ ]*([0-9]+)[ ]*GB</b> per 30 dagen, waarvan[^<]+<b>[ ]*([,0-9]+)[ ]*GB</b> upstream"
 REGEX_MAIN_DATEBROAD = "Door overschrijding van uw toegelaten volume werd de snelheid van uw modem beperkt. Uw snelheid wordt automatisch hersteld op<b>\n[\t]+([0-9]{2}/[0-9]{2}/[0-9]{4})"
 
+REGEX_ERROR="errcode=([^&]+)&"
+
 if __name__ == "__main__":
 	fatalError("Don't run this as a program, this is a module.")

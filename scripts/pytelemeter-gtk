@@ -11,6 +11,7 @@ pygtk.require('2.0')
 import gtk
 from pytelemeter.Telemeter import Telemeter
 from pytelemeter import VERSION
+from pytelemeter.GlobalFunctions import fatalError
 import sys,string,datetime,time,random
 
 class PyTeleGui:
@@ -40,9 +41,7 @@ class PyTeleGui:
                 	self.ep.set_text(self.meter.password)
 
 		except:
-			print "Check your settings..."
-			#raise
-			pass	
+			fatalError("Parent error: exiting...")
 	def add_row(self, date, total, upload):
 	        rand = self.rand
 

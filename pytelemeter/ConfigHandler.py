@@ -8,6 +8,7 @@
 
 import ConfigParser
 import os
+from GlobalFunctions import fatalError
 
 # config file
 configfile = os.environ['HOME'] + "/.pytelemeterrc"

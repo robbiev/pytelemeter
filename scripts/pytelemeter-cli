@@ -8,6 +8,7 @@
 
 from pytelemeter.Telemeter import Telemeter
 from pytelemeter import VERSION
+from pytelemeter.GlobalFunctions import fatalError
 import getopt, sys, time
 
 def usage():
@@ -19,6 +20,7 @@ def usage():
 	print "  -d\tshow daily statistics"
 	print "  -m\tcalculate volume left"
         print "  -s\tsilent mode"
+	print "  -v\tverbose debug output"	
 
 def makeScale(perc,schaal):
 	if (perc > 100):
@@ -76,7 +78,7 @@ def printMaxDownload(meter,silent):
 
 def main():
 	try:
-		o, a = getopt.getopt(sys.argv[1:], ":hdms")
+		o, a = getopt.getopt(sys.argv[1:], ":hdmsv")
 	except getopt.GetoptError:
 		usage()
 		sys.exit(2)
@@ -85,6 +87,7 @@ def main():
 	showMax = 0
 	opts = {}
         silent = 0
+	debug="false"
 	for k,v in o:
 		opts[k] = v
 	if opts.has_key('-h') or opts.has_key('--help'):
@@ -97,7 +100,10 @@ def main():
         if opts.has_key("-s"):
                 silent = 1
 
-	meter = Telemeter()
+	if opts.has_key("-v"):
+		debug="true"
+	
+	meter = Telemeter(debug)
 
 	meter.fetch(silent)
 

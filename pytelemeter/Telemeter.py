@@ -13,13 +13,15 @@ import urllib
 import urllib2
 import Constants
 from ConfigHandler import ConfigHandler
-
-# Use this for verbose debug output
-#import httplib
-#httplib.HTTPConnection.debuglevel = 1  
+from GlobalFunctions import fatalError
 
 class Telemeter:
-	def __init__(self):
+	def __init__(self,debug="false"):
+		if debug == "true":
+			# verbose debug
+			import httplib
+			httplib.HTTPConnection.debuglevel = 1  
+
 		config = ConfigHandler()
 		config.checkConfig()
 		config.getConfig()
@@ -39,16 +41,16 @@ class Telemeter:
                 if silent == 0:
                     sys.stdout.write("Fetching information... ")
                     sys.stdout.flush()
-		try:		 
-			self.getCookie()
-			self.htmlMain = self.getMainHtml()
-		
-			self.htmlOverview = self.getOverviewHtml()
+#		try:		 
+		self.getCookie()
+		self.htmlMain = self.getMainHtml()
+	
+		self.htmlOverview = self.getOverviewHtml()
                 
-			if silent == 0:
-		    		sys.stdout.write("done!\n")
-		except:
-			fatalError("\nUnexpected error! Maybe username and/or password incorrect?")
+		if silent == 0:
+	    		sys.stdout.write("done!\n")
+#		except:
+#			fatalError("\nUnexpected error! Maybe username and/or password incorrect?")
 
 	def getCookie(self):
 		try:
@@ -59,10 +61,11 @@ class Telemeter:
                                 self.cookie += i + " "
 
 		except IOError, (ignored,ignored,ignored,headers):
-                        #find a better way!
-                        if re.search(Constants.REGEX_FAILURE,headers["Location"]):
-                            fatalError("\nUsername/password combination incorrect.")
-
+			match = re.search(Constants.REGEX_ERROR,headers["Location"])
+			if (match):
+				fatalError("\nUnexpected error: " + match.group(1))
+			else:
+				fatalError("\nUnexpected error while fetching cookie")
 	def getMainHtml(self):
 		req = urllib2.Request(Constants.URL_MAIN)
 		req.add_header("Cookie",self.cookie)
