@@ -14,14 +14,12 @@ import urllib2
 import Constants
 from ConfigHandler import ConfigHandler
 from GlobalFunctions import fatalError
-from httplib import HTTPConnection
+import httplib
 
 class Telemeter:
 	def __init__(self,debug="false"):
 		if debug == "true":
-			# verbose debug
-			#import httplib
-			HTTPConnection.debuglevel = 1  
+			httplib.HTTPConnection.debuglevel = 1  
 
 		config = ConfigHandler()
 		config.checkConfig()
@@ -61,15 +59,34 @@ class Telemeter:
 			for i in cook:
                                 self.cookie += i + " "
 
-		except IOError, values:
-			for i in values:
-				print i
-				
-				#match = re.search(Constants.REGEX_ERROR,i)
-				#if match:
-				#	fatalError("\nUnexpected error: " + match.group(1))
-			#if not match:
-			#	fatalError("\nUnexpected error while fetching cookie")
+		except IOError, inst:
+			
+			errorStr = ""
+			if len(inst.args) >= 2:
+				errorStr = inst.args[0] + " " + str(inst.args[1])
+			else:
+				errorStr = "IOError"
+			
+			foundHTTPMessage = False
+			for arg in inst:
+				if isinstance(arg,httplib.HTTPMessage):
+					if arg.has_key("location"):
+						header = arg.getheaders("location")
+						match = re.search(Constants.REGEX_ERROR,str(header))
+						if match:
+							failString = match.group(1)
+							if failString == "sso.login.authfail.PasswordNOK":
+								errorStr += " => incorrect password"
+							elif failString == "sso.login.authfail.LoginDoesNotExist":
+								errorStr += " => incorrect login"
+							else:
+								errorStr += " => "
+								errorStr += failString
+							fatalError("\nUnexpected error: "+errorStr)
+							foundHTTPMessage = True
+			if foundHTTPMessage == False:
+				fatalError("\nUnexpected error: "+errorStr)	
+	
 	def getMainHtml(self):
 		req = urllib2.Request(Constants.URL_MAIN)
 		req.add_header("Cookie",self.cookie)

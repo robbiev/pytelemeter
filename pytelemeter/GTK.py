@@ -1,14 +1,27 @@
 #!/usr/bin/python
 #
-# pytelemeter GTK script 
-# Shows some statistics from the "Mijn Telenet" page.
+# pytelemeter GTK library 
+# Contains code for the GTK frontend. 
 # 
 # See COPYING for info about the license (GNU GPL)
 # Check AUTHORS to see who wrote this software.
 
-import pygtk
-#pygtk.require('2.0')
-import gtk
+# Perhaps some of these are already loaded, ignore those errors
+try:
+	import pygtk
+	pygtk.require('2.0')
+except ImportError:
+	pass
+except AssertionError:
+	pass
+try:
+	import gtk
+except ImportError:
+        pass
+except AssertionError:
+        pass
+
+
 from pytelemeter.Telemeter import Telemeter
 from pytelemeter import VERSION
 from pytelemeter.GlobalFunctions import fatalError
@@ -24,8 +37,9 @@ class PyTeleGui:
 			else:
 				self.meter = externalMeter
 				print "andere meter"
-		#self.config = ConfigHandler()
 		if str(self.eu.get_text()) != "" and str(self.ep.get_text()) != "":
+                        self.meter.username = self.eu.get_text()
+                        self.meter.password = self.ep.get_text()
                         self.config.setConfig(str(self.eu.get_text()),str(self.ep.get_text()))
 		#try:
 		if fetchAgain == 1:
@@ -85,6 +99,11 @@ class PyTeleGui:
         	self.window.set_position(gtk.WIN_POS_CENTER)
 		# Set the window title
         	self.window.set_title("pytelemeter v" + VERSION)
+
+                pixbuf = gtk.gdk.pixbuf_new_from_file("/usr/share/pixmaps/pytele.png")
+                scaled_buf = pixbuf.scale_simple(16,16,gtk.gdk.INTERP_BILINEAR)
+
+		gtk.window_set_default_icon_list(scaled_buf)
 
         	# Set a handler for delete_event that immediately
         	# exits GTK.

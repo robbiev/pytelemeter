@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 #
 # pytelemeter GTK script 
 # Shows some statistics from the "Mijn Telenet" page.
@@ -6,8 +6,8 @@
 # See COPYING for info about the license (GNU GPL)
 # Check AUTHORS to see who wrote this software.
 
-from pytelemeter.GTK import PyTeleGui
 import gtk
+from pytelemeter.GTK import PyTeleGui
 import sys
 
 def main():

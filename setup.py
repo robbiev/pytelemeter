@@ -40,6 +40,7 @@ def modules_check():
     except:
         sys.exit('Error: PyGTK 2 or newer is required.')
 
+
 setup(name="pytelemeter",
       version=VERSION,
       description="A small Python 'Telemeter' application to check out Telenet's download/upload statistics",
@@ -48,6 +49,7 @@ setup(name="pytelemeter",
       url="http://pytelemeter.sourceforge.net",
       scripts=['scripts/pytelemeter-cli', 'scripts/pytelemeter-gtk', 'scripts/pytelemeter-tray'],
       packages = ['pytelemeter'],
+      data_files = [("share/pixmaps", ["images/pytele.png"])],
       ext_modules = [TemplateExtension(name='trayicon',
 			pkc_name='pygtk-2.0 gtk+-2.0',
 			pkc_version='2.0.0',
