@@ -7,17 +7,15 @@
 #
 
 import gtk
-import pytelemeter
+from pytelemeter import Telemeter
 import sys
 from pytelemeter import VERSION
 
 class PyTeleGui:
 	def fillInfo(self, widget, data=None):
-		sys.stdout.write('Fetching information ... ')
-		sys.stdout.flush()
-		pytelemeter.main()
-		a,b = pytelemeter.getVolumeUsedProcent()
-		sys.stdout.write('done!\n')
+		meter = Telemeter()
+		meter.fetch()
+		a,b = meter.getVolumeUsed(1)
 		dval = float(int(a))/100
 	        uval = float(int(b))/100
        		self.dbar.set_fraction(dval)
