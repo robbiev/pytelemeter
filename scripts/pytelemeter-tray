@@ -1,0 +1,71 @@
+#!/usr/bin/python
+import pytelemeter
+import pytelemeter.pytrayicon
+import pygtk
+#pygtk.require('2.0')
+import gtk
+import os
+
+class Tray:
+    
+    def __init__(self, ):
+        self.tray = pytelemeter.pytrayicon.TrayIcon("pytelemeter");
+        eventbox = gtk.EventBox()
+        self.tray.add(eventbox)
+        eventbox.connect("button_press_event", self.clicked)
+
+        #image = gtk.Image()
+        #pixbuf = gtk.gdk.pixbuf_new_from_file(straw.main.get_icon())
+        #scaled_buf = pixbuf.scale_simple(16,16,gtk.gdk.INTERP_BILINEAR)
+        #image.set_from_pixbuf(scaled_buf)
+        #eventbox.add(image)
+	label = gtk.Label("P")
+	eventbox.add(label)
+	
+	tooltip = gtk.Tooltips()
+	tooltip.set_tip(self.tray,"Pytelemeter\nClick to open GTK interface...")
+	
+	self.tray.show_all()
+#        self._tooltip = gtk.Tooltips()
+#        self.unread_count = 0
+#        self._feedlist = straw.FeedList.get_instance()
+#        for feed in self._feedlist.flatten_list():
+#            self.__add_feed(feed)
+
+
+#    def feed_added(self, signal):
+#        self.__add_feed(signal.feed)
+
+#    def __add_feed(self, feed):
+#        feed.signal_connect(straw.NewItemsSignal, self.update)
+#        feed.signal_connect(straw.ItemsAddedSignal, self.update)
+#        feed.signal_connect(straw.ItemReadSignal, self.update)
+#        feed.signal_connect(straw.ItemDeletedSignal, self.update)
+#        feed.signal_connect(straw.AllItemsReadSignal, self.update)
+
+   # def update(self,signal):
+   #     uritems = urfeeds = 0
+   #     for ur in [f.number_of_unread for f in self._feedlist.flatten_list()]:
+   #         if ur:
+   #             uritems += ur
+   #             urfeeds += 1
+   #     if uritems == self.unread_count:
+   #         return
+   #     self.unread_count = uritems
+   #     if uritems > 0:
+   #         self._tooltip.set_tip(self.tray, _("%d new items")%uritems)
+   #         self.tray.show_all()
+   #     else:
+   #         self.tray.hide()
+
+    def clicked(self, signal, event):
+	os.system("pytelemeter-gtk")	 
+def main():
+        gtk.main()
+        return 0
+
+if __name__ == "__main__":
+        GUI = Tray()
+        main()
+        sys.exit(0)
+ 
