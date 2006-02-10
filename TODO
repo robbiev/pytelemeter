@@ -1,10 +1,12 @@
-* make a seperate GUI module
-* fix GUI configuration handling (changing)
-* fix refresh behavior between GTK and Tray
-* add some sommand line options to the GTK/Tray scripts
+* write more documentation
+* clean up the output, especially in the case of exceptions
 * setup improvents (automatic settings configuration script, check for certain modules)
-* show all cli output in other scripts too
-* clean up GTK code
-* verify build and run depends
+* allow changing and saving the configuration in the cli frontend too
+* alleviate non-root installation
+* ...
+
+possibilities for a 2.0 milestone
+* generalize the API to work with any service provider
+* support for po/gettext (nl,fr?)
 
 Feel free to suggest other features to <pytelemeter-support@lists.sourceforge.net>

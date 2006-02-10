@@ -1,1 +1,72 @@
-see INSTALL
+Start Here
+----------
+First, make sure you agree to all the terms stated in the COPYING file.
+Comments or suggestions are welcome on the project mailinglist
+<pytelemeter-support@lists.sourceforge.net>, to contact the individual
+developers see the AUTHORS file.
+
+
+What the ...?
+-------------
+pytelemeter is a small Python application to fetch bandwidth usage
+statistics from the Belgian ISP Telenet.
+
+Telenet is one of the largest internet providers in Belgium. Like any
+other ISP in these regions, it imposes some limits on its home user's
+bandwidth usage, depending mostly on the monthly fee.
+The standard way users can follow up on their usage is the ISP's
+website, but that generally involves a lot of clicking.
+
+pytelemeter provides some additional, more convenient interfaces to
+access these bandwidth statistics. There is a non-interactive command
+line frontend, a graphical one based on the GTK toolkit and a
+freedesktop.org compliant system tray icon.
+
+
+Dependencies
+------------
+needed:
+  * Python >= 2.2 <http://www.python.org>
+  * PyXML >= 0.8.3 <http://pyxml.sourceforge.net>
+
+optional:
+  * PyGTK >= 2.0 <http://www.pygtk.org>
+    - only if you want to use the GTK interface
+    - glade support must be included (debian package: python-glade2)
+    - gnome-python-extras needed for systray support
+  * SOAPpy <http://pywebsvcs.sourceforge.net/>
+    - only needed for the Telemeter4Tools parser
+
+
+Installation
+------------
+You must have root privileges to install pytelemeter the standard way:
+
+ $ sudo python setup.py install
+  or
+ # python setup.py install
+
+When root access is not an option, adding the location (parent dir) of
+the module directory to the sys.path should make the cli work, and
+changing the path to the glade and icon files should do the rest.
+Making non-root installation easier is on the TODO list.
+
+
+Setting up for use
+------------------
+This application needs a proper configuration file containing your
+Telenet username and password. The GUI variants of pytelemeter now
+provide an interface to handle the configfile, but you can still set it
+up manually if you want:
+
+* log on with your normal user account (you weren't planning on running
+  pytelemeter as root, were you...)
+* copy the example pytelemeterrc to ~/.pytelemeterrc
+* edit ~/.pytelemeterrc to match your Telenet username and password
+* last but not least, protect it from other users on the system:
+  $ chmod 600 ~/.pytelemeterrc
+* now run pytelemeter -h for more 
+
+
+If you run into any problems, you may want to check the Support page on
+our homepage <http://pytelemeter.sourceforge.net>

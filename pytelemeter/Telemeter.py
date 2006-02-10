@@ -1,204 +1,137 @@
-#!/usr/bin/env python
-#
-# pytelemeter library 
-# Fetches some statistics from the "Mijn Telenet" page.
-# 
 # See COPYING for info about the license (GNU GPL)
 # Check AUTHORS to see who wrote this software.
+"""
+    pytelemeter public interface
+"""
 
-import sys
-import os
-import re
-import urllib
-import urllib2
-import Constants
-from ConfigHandler import ConfigHandler
-from GlobalFunctions import fatalError
-import httplib
+import Config
+from Parser import *
+
 
 class Telemeter:
-	def __init__(self,debug="false"):
-		if debug == "true":
-			httplib.HTTPConnection.debuglevel = 1  
+    """ the public pytelemeter interface """
+    def __init__(self, output=None):
+        if not output:
+            output = Output()
+        self.output = output
+        self.usage = None
+        if self.output.debug:
+            import httplib
+            httplib.HTTPConnection.debuglevel = 1
+            del httplib
+        self.parsers=[]
+        try:
+            import Telemeter4ToolsParser
+            self.parsers.append(Telemeter4ToolsParser.Parser(output))
+        except:
+            pass # SOAPpy is probably not installed, silent skip it
+        try:
+            import FlashXMLParser
+            self.parsers.append(FlashXMLParser.Parser(output))
+        except:
+            pass # should not happen, but no real harm
+        self.config = Config.ConfigFile()
+        try:
+            self.read_config()
+        except Config.Error, e:
+            self.username = ''
+            self.password = ''
+            self.configerror = str(e)
 
-		config = ConfigHandler()
-		config.checkConfig()
-		config.getConfig()
-		self.username = config.username 
-		self.password = config.password 
+    def fetch(self):
+        self.usage = None
+        if not self.username or not self.password:
+            if self.configerror:
+                raise AuthenticationError, self.configerror
+            else:
+                raise AuthenticationError, 'login or password empty'
+        if not self.output.silent:
+            print 'Fetching information... ',
+        last = Exception('no parsers could be initialized')
+        for parser in self.parsers:
+            try:
+                self.usage = parser.fetch(self.username, self.password)
+                if not self.output.silent:
+                    print 'done!'
+                if self.output.verbose:
+                    self._print_stats()
+                    if self.output.remaining:
+                        self._print_remaining()
+                    if self.output.daily:
+                        self._print_daily()
+                return self.usage
+            except AuthenticationError, e:
+                raise
+            except Exception, e:
+                last = e
+        raise last
 
-		self.htmlMain = ""
-		self.htmlOverview = ""
+    def clear_cache(self):
+        for parser in self.parsers:
+            try:
+                parser.clear_cache()
+            except:
+                pass
 
-		self.cookie = ""
-		self.jsessionid = ""
-	
-	def fetch(self,silent=0):
-		if (self.username == "" or self.password == ""):
-			self.checkConfig()
-			self.getConfig()
-                if silent == 0:
-                    sys.stdout.write("Fetching information... ")
-                    sys.stdout.flush()
-#		try:		 
-		self.getCookie()
-		self.htmlMain = self.getMainHtml()
-	
-		self.htmlOverview = self.getOverviewHtml()
-                
-		if silent == 0:
-	    		sys.stdout.write("done!\n")
-#		except:
-#			fatalError("\nUnexpected error! Maybe username and/or password incorrect?")
+    def read_config(self):
+        self.configerror = None
+        self.username, self.password = self.config.read()
 
-	def getCookie(self):
-		try:
-			resp = urllib.URLopener().open(Constants.URL_LOGIN,urllib.urlencode({'goto': 'http://www.telenet.be/mijntelenet/index.php?content=https%3A%2F%2Fwww.telenet.be%2Fsys%2Fsso%2Fjump.php%3Fhttps%3A%2F%2Fservices.telenet.be%2Fisps%2FMainServlet%3FACTION%3DTELEMTR%26SSOSID%3D%24SSOSID%24','alt': '/mijntelenet/login.php','uid': self.username,'pwd': self.password}))
-		
-			cook =  re.findall(Constants.REGEX_COOKIE,resp.info()["Set-Cookie"])
-			for i in cook:
-                                self.cookie += i + " "
+    def save_config(self):
+        self.configerror = None
+        self.config.username = self.username
+        self.config.password = self.password
+        self.config.save()
 
-		except urllib2.HTTPError, inst:
-			fatalError("\nUnexpected http error: " + str(inst.code))
+    def _fill_scale(self, progress, max):
+        if (progress > 1):
+            return 'Exceeded!'.center(max)
+        return ('=' * int(round(max * progress))).ljust(max)
 
-		except IOError, inst:
-			
-			errorStr = ""
-			if len(inst.args) >= 2:
-				errorStr = inst.args[0] + " " + str(inst.args[1])
-			else:
-				errorStr = "IOError"
-			
-			foundHTTPMessage = False
-			for arg in inst:
-				if isinstance(arg,httplib.HTTPMessage):
-					if arg.has_key("location"):
-						header = arg.getheaders("location")
-						match = re.search(Constants.REGEX_ERROR,str(header))
-						if match:
-							failString = match.group(1)
-							if failString == "sso.login.authfail.PasswordNOK":
-								errorStr += " => incorrect password"
-							elif failString == "sso.login.authfail.LoginDoesNotExist":
-								errorStr += " => incorrect login"
-							else:
-								errorStr += " => "
-								errorStr += failString
-							fatalError("\nUnexpected error: "+errorStr)
-							foundHTTPMessage = True
-			if foundHTTPMessage == False:
-				fatalError("\nUnexpected error: "+errorStr)	
-	
-	def getMainHtml(self):
-		try:
-			req = urllib2.Request(Constants.URL_MAIN)
-			req.add_header("Cookie",self.cookie)
-			ssosid = re.search(Constants.REGEX_COOKIE_SSOSID,self.cookie).group(1)
-			page = urllib2.urlopen(req,urllib.urlencode({'ACTION': 'TELEMTR','SSOSID': ssosid}))
-			# there is a jsessionid sent, catch it for the overview
-			self.jsessionid = re.search(Constants.REGEX_COOKIE,page.info()["Set-Cookie"]).group(1)
-			return page.read()
+    def _print_stats(self):
+        d = self.usage.down
+        u = self.usage.up
 
-                except urllib2.HTTPError, inst:
-                        fatalError("\nUnexpected http error: " + str(inst.code))
+        if not self.output.silent:
+            print ''
+            print 'Telemeter statistics @ %s' \
+                % datetime.date.today().strftime('%d %b %Y')
+            print '----------------------------------'
 
-                except IOError, inst:
-                        
-                        errorStr = ""
-                        if len(inst.args) >= 2:
-                                errorStr = inst.args[0] + " " + str(inst.args[1])
-                        else:
-                                errorStr = "IOError"
-                        
-                        foundHTTPMessage = False
-                        for arg in inst:
-                                if isinstance(arg,httplib.HTTPMessage):
-                                        if arg.has_key("location"):
-                                                header = arg.getheaders("location")
-                                                match = re.search(Constants.REGEX_ERROR,str(header))
-                                                if match:
-                                                        failString = match.group(1)
-                                                        if failString == "sso.login.authfail.PasswordNOK":
-                                                                errorStr += " => incorrect password"
-                                                        elif failString == "sso.login.authfail.LoginDoesNotExist":
-                                                                errorStr += " => incorrect login"
-                                                        else:
-                                                                errorStr += " => "
-                                                                errorStr += failString
-                                                        fatalError("\nUnexpected error: "+errorStr)
-                                                        foundHTTPMessage = True
-                        if foundHTTPMessage == False:
-                                fatalError("\nUnexpected error: "+errorStr)
+        print '%s [%s] %5s MiB (%2s%%)' % ('Download Volume: ', 
+            self._fill_scale(d.total_float, 20), d.total, d.total_pct)
+        print '%s [%s] %5s MiB (%2s%%)' % (' Upload  Volume: ',
+            self._fill_scale(u.total_float, 20), u.total, u.total_pct)
+        print ''
 
+    def _print_remaining(self):
+        down = self.usage.down
+        up = self.usage.up
+        nextbill = self.usage.nextbill.strftime('%d/%m/%y')
 
-	def getOverviewHtml(self):
-		try:
-			req = urllib2.Request(Constants.URL_OVERVIEW)
-			req.add_header("Cookie",self.jsessionid)
-			page = urllib2.urlopen(req)
-			return page.read()
+        if down.total > down.total_max:
+            print 'You exceeded your prepaid download volume by ' +\
+                '%i MiB.' % (down.total - down.total_max)
+        else:
+            print ('Before %s, you can download %i MiB without ' +\
+                'exceeding your prepaid download volume.') % (
+                nextbill, down.total_max - down.total)
 
-                except urllib2.HTTPError, inst:
-                        fatalError("\nUnexpected http error: " + str(inst.code))
+        if up.total > up.total_max:
+            print 'You exceeded your prepaid upload volume by ' +\
+                '%i MiB.' % (up.total - up.total_max)
+        else:
+            print ('Before %s, you can upload %i MiB without ' +\
+                'exceeding your prepaid upload volume.') % (
+                nextbill, up.total_max - up.total)
+        print ''
 
-                except IOError, inst:
-                        
-                        errorStr = ""
-                        if len(inst.args) >= 2:
-                                errorStr = inst.args[0] + " " + str(inst.args[1])
-                        else:
-                                errorStr = "IOError"
-                        
-                        foundHTTPMessage = False
-                        for arg in inst:
-                                if isinstance(arg,httplib.HTTPMessage):
-                                        if arg.has_key("location"):
-                                                header = arg.getheaders("location")
-                                                match = re.search(Constants.REGEX_ERROR,str(header))
-                                                if match:
-                                                        failString = match.group(1)
-                                                        if failString == "sso.login.authfail.PasswordNOK":
-                                                                errorStr += " => incorrect password"
-                                                        elif failString == "sso.login.authfail.LoginDoesNotExist":
-                                                                errorStr += " => incorrect login"
-                                                        else:
-                                                                errorStr += " => "
-                                                                errorStr += failString
-                                                        fatalError("\nUnexpected error: "+errorStr)
-                                                        foundHTTPMessage = True
-                        if foundHTTPMessage == False:
-                                fatalError("\nUnexpected error: "+errorStr)
-
-
-	def getVolumeUsed(self, procent):
-		if (procent == 1):
-	 		total = int(re.findall(Constants.REGEX_MAIN_USED, self.htmlMain)[0])
-			upload = int(re.findall(Constants.REGEX_MAIN_USED, self.htmlMain)[1])
-		else:
-			match = re.findall(Constants.REGEX_OVERVIEW_TOTALUSED, self.htmlOverview)
-			total = int(match[0])
-			upload = int(match[1])
-		return total, upload
-	
-	def getOverview(self):
-		# Overview
-		return re.findall(Constants.REGEX_OVERVIEW_DAYS, self.htmlOverview)
-	
-	def getVolumeMax(self):
-		# allowed volume
-		volumeMax = re.search(Constants.REGEX_MAIN_MAX, self.htmlMain)
-		totalMax = int(volumeMax.group(1))
-		uploadMax = float(volumeMax.group(2).replace(",", "."))
-		return totalMax, uploadMax
-
-	def getDateBroad(self):
-		# date you return to broadband
-		date = re.search(Constants.REGEX_MAIN_DATEBROAD, self.htmlMain)
-		if date:
-			return date.group(1)
-		else:
-			return "Within volume limits"
-
-if __name__ == "__main__":
-	fatalError("Don't run this as a program, this is a module.")
+    def _print_daily(self):
+        if not self.output.silent:
+            print 'Daily statistics:'
+            print '-----------------'
+        print '   Day   | Download |  Upload'
+        for day in self.usage.chart:
+            print '%s | %8s | %8s' % (day.date.strftime('%d/%m/%y'),
+                                                    day.down, day.up)
+        print ''

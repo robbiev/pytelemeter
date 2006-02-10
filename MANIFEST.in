@@ -1,12 +1,11 @@
 include AUTHORS
-include CREDITS
 include COPYING
-include INSTALL
+include CREDITS
 include MANIFEST.in
 include README
 include TODO
-include images/*
-include eggtray/*
-include scripts/*
+include pytelemeter.1
 include pytelemeterrc
-include setup.py
+include images/*
+include glade/*
+include scripts/*

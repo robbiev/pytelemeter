@@ -1,0 +1,99 @@
+#!/usr/bin/env python
+#
+# See COPYING for info about the license (GNU GPL)
+# Check AUTHORS to see who wrote this software.
+"""
+pytelemeter v%s
+Fetch bandwidth usage statistics from the Belgian ISP Telenet
+Homepage: <http://pytelemeter.sourceforge.net>
+
+Usage:  pytelemeter [options...]
+        pytelemeter-gtk [options...]
+        pytelemeter-tray [options...]
+
+Interface options:
+  -c, --cli             command line interface
+                            default when invoked as pytelemeter
+  -g, --gui, --gtk      open the GTK graphical user interface
+                            default when invoked as pytelemeter-gtk
+  -t, --tray            open the system tray icon
+                            default when invoked as pytelemeter-tray
+
+Output options:
+  -m, -r, --remaining   also output remaining bandwidth
+  -d, --daily           also output daily statistics
+
+  -s, --silent          silent mode
+  -v. --verbose         verbose output (always on for cli)
+  -D, --debug           show (http) debug info
+
+Help options:
+  -h, --help            print this message and exit
+  -V, --version         print the version string and exit
+"""
+
+from pytelemeter.Telemeter import Telemeter
+from pytelemeter.Parser import *
+from pytelemeter import VERSION
+import sys
+import getopt
+import time
+
+__version__ = 'pytelemeter v%s' % VERSION
+
+def gtk():
+    from pytelemeter.GTK import TelemeterGUI
+    return TelemeterGUI(meter)
+def tray():
+    from pytelemeter.Tray import TelemeterTray
+    return TelemeterTray(meter)
+
+if __name__ == "__main__":
+    output = Output()
+    meter = Telemeter(output)
+    gui = None
+
+    name = sys.argv[0]
+    if name.endswith('-gtk'):
+        gui = gtk()
+    elif name.endswith('-tray'):
+        gui = tray()
+    try:
+       options, args = getopt.getopt(sys.argv[1:], 'cgtmrdsvDhV',
+            ['cli', 'gui', 'gtk', 'tray', 'remaining', 'daily',
+            'silent', 'verbose' , 'debug', 'help', 'version'])
+    except getopt.GetoptError:
+        print >> sys.stderr, __doc__ % VERSION
+        sys.exit(2)
+
+    for opt, arg in options:
+        if opt in ('-g', '--gui', '--gtk'):
+            gui = gtk()
+        elif opt in ('-t', '--tray'):
+            gui = tray()
+        elif opt in ('-c', '--cli'):
+            gui = None
+        elif opt in ('-d', '--daily'):
+            output.daily = True
+        elif opt in ('-m', '-r', '--remaining'):
+            output.remaining = True
+        elif opt in ('-s', '--silent'):
+            output.silent = True
+        elif opt in ('-v', '--verbose'):
+            output.verbose = True
+        elif opt in ('-D', '--debug'):
+            output.debug = True
+        elif opt in ('-h', '--help'):
+            print __doc__ % VERSION
+            sys.exit(0)
+        elif opt in ('-V', '--version'):
+            print __version__
+            sys.exit(0)
+
+    if gui:
+        gui.refresh()
+        import gtk
+        gtk.main()
+    else:
+        output.verbose = True
+        meter.fetch()
