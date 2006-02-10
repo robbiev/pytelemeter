@@ -31,7 +31,7 @@ class TelemeterTray(UpdateListener):
         self.area = gtk.DrawingArea()
         self.area.set_size_request(24,24)
         self.area.connect('expose-event', self.on_expose_event)
-        self.area.connect('configure-event', self.on_configure_event)
+        self.area.connect_after('realize', self.on_realize_area)
 
         eventbox = gtk.EventBox()
         eventbox.connect('button_press_event', self.on_tray_clicked)
@@ -135,12 +135,12 @@ class TelemeterTray(UpdateListener):
         return 'red'
 
 # signal handlers
-    def on_configure_event(self, area, event=None):
+    def on_realize_area(self, area):
         # we suppose the tray area is 24x24
         self.buffer = gtk.gdk.Pixmap(area.window, 24, 24)
         background = area.get_style().bg_gc[gtk.STATE_NORMAL]
         self.buffer.draw_rectangle(background, True, 0, 0, 24, 24)
-        self.gc = self.area.window.new_gc()
+        self.gc = area.window.new_gc()
 
         # actual font size depends on screen dpi
         screen = area.get_screen()
