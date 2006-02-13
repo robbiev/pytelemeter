@@ -27,14 +27,14 @@ Dependencies
 ------------
 needed:
   * Python >= 2.2 <http://www.python.org>
-  * PyXML >= 0.8.3 <http://pyxml.sourceforge.net>
 
 optional:
   * PyGTK >= 2.0 <http://www.pygtk.org>
     - only if you want to use the GTK interface
     - glade support must be included (debian package: python-glade2)
     - gnome-python-extras needed for systray support
-  * SOAPpy <http://pywebsvcs.sourceforge.net/>
+  * SOAPpy <http://pywebsvcs.sourceforge.net/> and
+    PyXML >= 0.8.3 <http://pyxml.sourceforge.net>
     - only needed for the Telemeter4Tools parser
 
 
