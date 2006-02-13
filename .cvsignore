@@ -3,3 +3,4 @@ MANIFEST
 debian
 build
 dist
+*.pyc
