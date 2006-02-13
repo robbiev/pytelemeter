@@ -16,11 +16,12 @@ class AuthenticationError(Error): pass
 class Output:
     "the output level"
     def __init__(self, silent=False, verbose=False, debug=False,
-                    daily=False, remaining=False):
+                    daily=False, dailybars=False, remaining=False):
         self.silent = silent
         self.verbose = verbose
         self.debug = debug
         self.daily = daily
+        self.dailybars = dailybars
         self.remaining = remaining
 
 class TelemeterParser:

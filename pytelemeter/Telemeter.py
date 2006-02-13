@@ -15,10 +15,6 @@ class Telemeter:
             output = Output()
         self.output = output
         self.usage = None
-        if self.output.debug:
-            import httplib
-            httplib.HTTPConnection.debuglevel = 1
-            del httplib
         self.parsers=[]
         try:
             import Telemeter4ToolsParser
@@ -131,7 +127,18 @@ class Telemeter:
             print 'Daily statistics:'
             print '-----------------'
         print '   Day   | Download |  Upload'
-        for day in self.usage.chart:
-            print '%s | %8s | %8s' % (day.date.strftime('%d/%m/%y'),
-                                                    day.down, day.up)
+        if self.output.dailybars:
+            for day in self.usage.chart:
+                print '%s | %8s | %8s  [%s|%s]' % (
+                    day.date.strftime('%d/%m/%y'),
+                    day.down, day.up,
+                    self._print_daybar(day.down),
+                    self._print_daybar(day.up))
+        else:
+            for day in self.usage.chart:
+                print '%s | %8s | %8s' % (
+                    day.date.strftime('%d/%m/%y'), day.down, day.up)
         print ''
+
+    def _print_daybar(self, mib):
+        return '=' * int(round(mib / 50.0))

@@ -22,6 +22,7 @@ Interface options:
 Output options:
   -m, -r, --remaining   also output remaining bandwidth
   -d, --daily           also output daily statistics
+  -b, --daily-bars      add barchart to daily stats (implies -d)
 
   -s, --silent          silent mode
   -v. --verbose         verbose output (always on for cli)
@@ -42,11 +43,27 @@ import time
 __version__ = 'pytelemeter v%s' % VERSION
 
 def gtk():
-    from pytelemeter.GTK import TelemeterGUI
-    return TelemeterGUI(meter)
+    try:
+        from pytelemeter.GTK import TelemeterGUI
+        return TelemeterGUI(meter)
+    except:
+        if output.debug:
+            raise
+        else:
+            print >> sys.stderr, 'Warning: failed to initialize GTK' +\
+                ' interface, try -D for debugging info'
+            return None
 def tray():
-    from pytelemeter.Tray import TelemeterTray
-    return TelemeterTray(meter)
+    try:
+        from pytelemeter.Tray import TelemeterTray
+        return TelemeterTray(meter)
+    except:
+        if output.debug:
+            raise
+        else:
+            print >> sys.stderr, 'Warning: failed to initialize tray' +\
+                ' icon, try -D for debugging info'
+            return None
 
 if __name__ == "__main__":
     output = Output()
@@ -59,9 +76,9 @@ if __name__ == "__main__":
     elif name.endswith('-tray'):
         gui = tray()
     try:
-       options, args = getopt.getopt(sys.argv[1:], 'cgtmrdsvDhV',
-            ['cli', 'gui', 'gtk', 'tray', 'remaining', 'daily',
-            'silent', 'verbose' , 'debug', 'help', 'version'])
+       options, args = getopt.getopt(sys.argv[1:], 'cgtmrdbsvDhV',
+            ['cli', 'gui', 'gtk', 'tray', 'remaining', 'daily-bars',
+            'daily', 'silent', 'verbose' , 'debug', 'help', 'version'])
     except getopt.GetoptError:
         print >> sys.stderr, __doc__ % VERSION
         sys.exit(2)
@@ -75,6 +92,9 @@ if __name__ == "__main__":
             gui = None
         elif opt in ('-d', '--daily'):
             output.daily = True
+        elif opt in ('-b', '--daily-bars'):
+            output.daily = True
+            output.dailybars = True
         elif opt in ('-m', '-r', '--remaining'):
             output.remaining = True
         elif opt in ('-s', '--silent'):
@@ -90,6 +110,9 @@ if __name__ == "__main__":
             print __version__
             sys.exit(0)
 
+    if self.output.debug:
+        import httplib
+        httplib.HTTPConnection.debuglevel = 1
     if gui:
         gui.refresh()
         import gtk
