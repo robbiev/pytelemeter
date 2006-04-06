@@ -110,7 +110,7 @@ if __name__ == "__main__":
             print __version__
             sys.exit(0)
 
-    if self.output.debug:
+    if output.debug:
         import httplib
         httplib.HTTPConnection.debuglevel = 1
     if gui:
