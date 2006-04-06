@@ -24,6 +24,10 @@ Output options:
   -d, --daily           also output daily statistics
   -b, --daily-bars      add barchart to daily stats (implies -d)
 
+  -p, --property=name   only output a single property (implies -c -s)
+                            for a list of implemented properties,
+                            use --property=help (or -phelp)
+
   -s, --silent          silent mode
   -v. --verbose         verbose output (always on for cli)
   -D, --debug           show (http) debug info
@@ -41,6 +45,28 @@ import getopt
 import time
 
 __version__ = 'pytelemeter v%s' % VERSION
+
+propertieshelp = """pytelemeter v%s
+
+Usage:  pytelemeter -p <property>
+        pytelemeter --property=<property>
+
+Currently implemented properties:""" % VERSION
+
+properties = [
+    (['download', 'download-mib'], 'down.mib',
+        'MiB downloaded so far this month'),
+    (['download-pct'], 'down.pct',
+        'current download percentage'),
+    (['upload', 'upload-mib'], 'up.mib',
+        'MiB uploaded so far this month'),
+    (['upload-pct'], 'up.pct',
+        'current upload percentage'),
+    (['daysleft'], 'daysleft',
+        'number of days until next reset'),
+    (['nextbill', 'nextreset'], 'nextbill',
+        'date of next reset (yyyy-mm-dd)'),
+    ]
 
 def gtk():
     try:
@@ -69,6 +95,7 @@ if __name__ == "__main__":
     output = Output()
     meter = Telemeter(output)
     gui = None
+    prop = None
 
     name = sys.argv[0]
     if name.endswith('-gtk'):
@@ -76,9 +103,10 @@ if __name__ == "__main__":
     elif name.endswith('-tray'):
         gui = tray()
     try:
-       options, args = getopt.getopt(sys.argv[1:], 'cgtmrdbsvDhV',
-            ['cli', 'gui', 'gtk', 'tray', 'remaining', 'daily-bars',
-            'daily', 'silent', 'verbose' , 'debug', 'help', 'version'])
+       options, args = getopt.getopt(sys.argv[1:], 'cgtmrdbp:svDhV',
+            ['cli', 'gui', 'gtk', 'tray', 'remaining', 'daily',
+            'daily-bars', 'property=', 'silent', 'verbose' , 'debug',
+            'help', 'version'])
     except getopt.GetoptError:
         print >> sys.stderr, __doc__ % VERSION
         sys.exit(2)
@@ -95,6 +123,15 @@ if __name__ == "__main__":
         elif opt in ('-b', '--daily-bars'):
             output.daily = True
             output.dailybars = True
+        elif opt in ('-p', '--property'):
+            if arg in ('help'):
+                print propertieshelp
+                for names, loc, help in properties:
+                    print ' ', ', '.join(names).ljust(25), help
+                print
+                sys.exit(0)
+            prop = arg
+            output.silent = True
         elif opt in ('-m', '-r', '--remaining'):
             output.remaining = True
         elif opt in ('-s', '--silent'):
@@ -113,7 +150,15 @@ if __name__ == "__main__":
     if output.debug:
         import httplib
         httplib.HTTPConnection.debuglevel = 1
-    if gui:
+    if prop:
+        for names, loc, help in properties:
+            if prop in names:
+                meter.fetch()
+                print eval('meter.usage.%s' % loc)
+                sys.exit(0)
+        print >> sys.stderr, "Error: no such property: %s" % prop
+        sys.exit(2)
+    elif gui:
         gui.refresh()
         import gtk
         gtk.main()

@@ -57,6 +57,33 @@ also output daily statistics
 \fB\-b\fR, \fB\-\-daily-bars\fR
 add barchart to daily stats (implies \fB\-d\fR)
 .TP
+\fB\-p\fR \fIproperty\fR, \fB\-\-property\fR=\fIproperty\fR
+only output a single property (implies \fB\-c \-s\fR)
+.IP
+Currently implemented properties:
+.RS
+.PD 0
+.TP
+.B download, download-mib
+MiB downloaded so far this month
+.TP
+.B download-pct
+current download percentage
+.TP
+.B upload, upload-mib
+MiB uploaded so far this month
+.TP
+.B upload-pct
+current upload percentage
+.TP
+.B daysleft
+number of days until next reset
+.TP
+.B nextbill, nextreset
+date of next reset (yyyy-mm-dd)
+.PD
+.RE
+.TP
 \fB\-s\fR, \fB\-\-silent\fR
 silent mode
 .TP
