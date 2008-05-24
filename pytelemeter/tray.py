@@ -1,5 +1,3 @@
-# See COPYING for info about the license (GNU GPL)
-# Check AUTHORS to see who wrote this software.
 """
     pytelemeter freedesktop.org compliant system tray icon
 """
@@ -13,10 +11,16 @@ import gtk
 import egg.trayicon
 import pango
 
-from Telemeter import Telemeter
-from GTK import *
-from Parser import *
-from __init__ import VERSION
+from gladegui import *
+from parser import *
+from __init__ import *
+
+
+# constants
+UP = {  'down': 'Download:',
+        'up':   'Upload:\t',
+        'sum':  'Transfer:\t'
+}
 
 
 class TelemeterTray(UpdateListener):
@@ -39,7 +43,7 @@ class TelemeterTray(UpdateListener):
         self.tray.add(eventbox)
 
         self.tooltips = gtk.Tooltips()
-        self.tooltips.set_tip(self.tray,'Pytelemeter v%s' % VERSION)
+        self.tooltips.set_tip(self.tray,'Pytelemeter v%s' % __version__)
 
         self.menu = gtk.Menu()
 
@@ -91,42 +95,50 @@ class TelemeterTray(UpdateListener):
 
     def update(self):
         "read the latest data from the telemeter"
-        if not self.meter.usage:
-            return
-        dn = self.meter.usage.down
-        up = self.meter.usage.up
-        offset = 11 # vertical distance between the 2 bars
+        bars = []
+        if self.meter.usage:
+            totals = self.meter.usage.totals
+            for dir in ('down', 'up', 'sum'):
+                if totals.has_key(dir):
+                    bars.append(totals[dir])
+
         # blank the area
         gc = self.area.get_style().bg_gc[gtk.STATE_NORMAL]
         self.buffer.draw_rectangle(gc, True, 0, 0, 24, 24)
-        # draw the outline
-        gc = self.area.get_style().black_gc
-        self.buffer.draw_rectangle(gc, False, 1, 1, 21, 9)
-        self.buffer.draw_rectangle(gc, False, 1, 1+offset, 21, 9)
-        # fill the bars and tag on the text
-        self._drawbar(dn, 0)
-        self._drawbar(up, offset)
+        # draw the bars and tag on the text
+        if len(bars) >= 1:
+            if len(bars) >= 2:
+                self._drawbar(bars[0], 0)
+                self._drawbar(bars[1], 11)
+            else:
+                self._drawbar(bars[0], 5)
+        else:
+            pass #TODO draw the logo
         # we updated the buffer, now force redrawing
         self.area.queue_draw()
         # finally, the tooltip
-        tip = 'Download:\t%s MiB (%s%%)\n' % (dn.total, dn.total_pct)
-        tip += 'Upload\t\t%s MiB (%s%%)\n' % (up.total, up.total_pct)
-        tip += '\npytelemeter v%s' % VERSION
+        tip = ''
+        line = '%s\t%s MiB (%s%%)\n'
+        for bar in bars:
+            tip += line % (UP[bar.constraint], bar.mib, bar.pct)
+        tip += '\npytelemeter v%s' % __version__
         self.tooltips.set_tip(self.tray, tip)
 
     def _drawbar(self, usage, offset):
         colormap = gtk.gdk.colormap_get_system()
-        color = self._status_color(usage.total_pct)
+        color = self._status_color(usage.pct)
         self.gc.foreground = colormap.alloc_color(color)
-        width = int(round(20 * usage.total_float))
+        width = int(round(20 * usage.float))
         self.buffer.draw_rectangle(self.gc, True, 2, 2+offset, width, 8)
 
-        layout = self.area.create_pango_layout('%i%%' % usage.total_pct)
+        layout = self.area.create_pango_layout('%i%%' % usage.pct)
         layout.set_font_description(self.smallfont)
         layout.set_alignment(pango.ALIGN_CENTER)
         layout.set_width(20)
         black = self.area.get_style().black_gc
-        self.buffer.draw_layout(black, 13, offset, layout)
+        self.buffer.draw_layout(black, 12, 1+offset, layout)
+
+        self.buffer.draw_rectangle(black, False, 1, 1+offset, 21, 9)
 
     def _status_color(self, pct):
         if pct <= 70: return 'green'
@@ -145,8 +157,8 @@ class TelemeterTray(UpdateListener):
         # actual font size depends on screen dpi
         screen = area.get_screen()
         dpi = 25.4 * screen.get_height() / screen.get_height_mm()
-        size = int(round(600 / dpi))
-        self.smallfont = pango.FontDescription('Sans Serif %i' % size)
+        size = int(round(675 / dpi))
+        self.smallfont = pango.FontDescription('FreeSans,sans %i' % size)
 
     def on_expose_event(self, area, event):
         x , y, width, height = event.area

@@ -1,5 +1,3 @@
-# See COPYING for info about the license (GNU GPL)
-# Check AUTHORS to see who wrote this software.
 """
     pytelemeter GTK graphical user interface
 """
@@ -13,9 +11,8 @@ import gtk
 import gtk.glade
 import sys
 import os
-from __init__ import VERSION
-from Telemeter import Telemeter
-from Parser import *
+from __init__ import *
+from parser import *
 
 # constants
 ICON = '/usr/share/pixmaps/pytele_small.png'
@@ -66,7 +63,7 @@ class TelemeterGUI:
 
         # main window
         self.window = self.xml.get_widget('main_window')
-        self.window.set_title('pytelemeter v' + VERSION)
+        self.window.set_title('pytelemeter v%s' % __version__)
         self.window.set_icon_from_file(ICON)
 
         self.update()
@@ -76,7 +73,7 @@ class TelemeterGUI:
             self.meter.fetch()
         except AuthenticationError, e:
             self.ask_credentials(e)
-        except Error, e:
+        except ParserError, e:
             self.error(str(e))
         self.update()
         if self.listener:
@@ -105,18 +102,28 @@ class TelemeterGUI:
         usage = self.meter.usage
         dbar = self.xml.get_widget('download_progressbar')
         ubar = self.xml.get_widget('upload_progressbar')
-        dbar.set_fraction(usage.down.total_float)
-        dbar.set_text(str(usage.down.total_pct) + '%')
-        ubar.set_fraction(usage.up.total_float)
-        ubar.set_text(str(usage.up.total_pct) + '%')
+        if usage.totals.has_key('down'):
+            dbar.set_fraction(usage.down.float)
+            dbar.set_text(str(usage.down.pct) + '%')
+            ubar.set_fraction(usage.up.float)
+            ubar.set_text(str(usage.up.pct) + '%')
+        else:
+            dbar.set_fraction(usage.sum.float)
+            dbar.set_text(str(usage.sum.pct) + '%')
+            ubar.hide()
+            self.xml.get_widget('download_label').set_text('Transfer')
+            self.xml.get_widget('upload_label').hide()
         scale = self.xml.get_widget('daysleft_scale')
         scale.set_value(usage.daysleft)
         self.history.clear()
         for day in usage.chart:
             datestring = day.date.strftime('%Y/%m/%d')
-            self.history.prepend([datestring, day.down, day.up])
+            if day.values.has_key('down'):
+                self.history.prepend([datestring, day.down, day.up])
+            else:
+                self.history.prepend([datestring, day.sum, 0])
         uentry = self.xml.get_widget('username_entry')
-        uentry.set_text(self.meter.username)
+        uentry.set_text(self.meter.config.account.username)
         pentry = self.xml.get_widget('password_entry')
         pentry.set_text('')
         self._set_errormsg('')
@@ -133,9 +140,9 @@ class TelemeterGUI:
         username = self.xml.get_widget('username_entry').get_text()
         password = self.xml.get_widget('password_entry').get_text()
         if username != '' and password != '':
-            self.meter.username = username
-            self.meter.password = password
+            self.meter.config.account = Account(username, password)
             self.meter.clear_cache()
+            self.meter.clear_error()
 
 # handlers
     def on_refresh_button_clicked(self, button=None, data=None):
@@ -144,7 +151,7 @@ class TelemeterGUI:
 
     def on_save_button_clicked(self, button=None, data=None):
         self.pass_credentials()
-        self.meter.save_config()
+        self.meter.config.save()
 
     def on_close_button_clicked(self, button=None, data=None):
         if self.trayMode:

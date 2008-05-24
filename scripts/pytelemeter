@@ -1,7 +1,4 @@
 #!/usr/bin/env python
-#
-# See COPYING for info about the license (GNU GPL)
-# Check AUTHORS to see who wrote this software.
 """
 pytelemeter v%s
 Fetch bandwidth usage statistics from the Belgian ISP Telenet
@@ -35,23 +32,24 @@ Output options:
 Help options:
   -h, --help            print this message and exit
   -V, --version         print the version string and exit
+
+Account options:
+  -a, --account=name    use the specified account
+  -C, --config-file=cf  read account data from the given config file
 """
 
-from pytelemeter.Telemeter import Telemeter
-from pytelemeter.Parser import *
-from pytelemeter import VERSION
+from pytelemeter.parser import *
+from pytelemeter import *
 import sys
 import getopt
 import time
-
-__version__ = 'pytelemeter v%s' % VERSION
 
 propertieshelp = """pytelemeter v%s
 
 Usage:  pytelemeter -p <property>
         pytelemeter --property=<property>
 
-Currently implemented properties:""" % VERSION
+Currently implemented properties:""" % __version__
 
 properties = [
     (['download', 'download-mib'], 'down.mib',
@@ -68,56 +66,57 @@ properties = [
         'date of next reset (yyyy-mm-dd)'),
     ]
 
-def gtk():
+def gladegui(meter, debug=False):
     try:
-        from pytelemeter.GTK import TelemeterGUI
+        from pytelemeter.gladegui import TelemeterGUI
         return TelemeterGUI(meter)
     except:
-        if output.debug:
+        if debug:
             raise
         else:
-            print >> sys.stderr, 'Warning: failed to initialize GTK' +\
-                ' interface, try -D for debugging info'
+            print >> sys.stderr, ('Warning: failed to initialize GTK'
+                ' interface, try -D for debugging info')
             return None
-def tray():
+def tray(meter, debug=False):
     try:
-        from pytelemeter.Tray import TelemeterTray
+        from pytelemeter.tray import TelemeterTray
         return TelemeterTray(meter)
     except:
-        if output.debug:
+        if debug:
             raise
         else:
-            print >> sys.stderr, 'Warning: failed to initialize tray' +\
-                ' icon, try -D for debugging info'
+            print >> sys.stderr, ('Warning: failed to initialize tray'
+                ' icon, try -D for debugging info')
             return None
 
 if __name__ == "__main__":
-    output = Output()
-    meter = Telemeter(output)
-    gui = None
+    creategui = None
     prop = None
+    output = TelemeterOutput()
+    configfile = None
+    account = None
 
     name = sys.argv[0]
     if name.endswith('-gtk'):
-        gui = gtk()
+        creategui = gladegui
     elif name.endswith('-tray'):
-        gui = tray()
+        creategui = tray
     try:
-       options, args = getopt.getopt(sys.argv[1:], 'cgtmrdbp:svDhV',
+       options, args = getopt.getopt(sys.argv[1:], 'cgtmrdbp:svDhVa:C:',
             ['cli', 'gui', 'gtk', 'tray', 'remaining', 'daily',
             'daily-bars', 'property=', 'silent', 'verbose' , 'debug',
-            'help', 'version'])
+            'help', 'version', 'account=', 'config-file='])
     except getopt.GetoptError:
-        print >> sys.stderr, __doc__ % VERSION
+        print >> sys.stderr, __doc__ % __version__
         sys.exit(2)
 
     for opt, arg in options:
         if opt in ('-g', '--gui', '--gtk'):
-            gui = gtk()
+            creategui = gladegui
         elif opt in ('-t', '--tray'):
-            gui = tray()
+            creategui = tray
         elif opt in ('-c', '--cli'):
-            gui = None
+            creategui = None
         elif opt in ('-d', '--daily'):
             output.daily = True
         elif opt in ('-b', '--daily-bars'):
@@ -141,24 +140,27 @@ if __name__ == "__main__":
         elif opt in ('-D', '--debug'):
             output.debug = True
         elif opt in ('-h', '--help'):
-            print __doc__ % VERSION
+            print __doc__ % __version__
             sys.exit(0)
         elif opt in ('-V', '--version'):
-            print __version__
+            print 'pytelemeter v%s' % __version__
             sys.exit(0)
+        elif opt in ('-a', '--account'):
+            account = arg
+        elif opt in ('-C', '--config-file'):
+            configfile = arg
 
-    if output.debug:
-        import httplib
-        httplib.HTTPConnection.debuglevel = 1
+    meter = Telemeter(output, configfile, account)
     if prop:
         for names, loc, help in properties:
             if prop in names:
                 meter.fetch()
                 print eval('meter.usage.%s' % loc)
                 sys.exit(0)
-        print >> sys.stderr, "Error: no such property: %s" % prop
+        print >> sys.stderr, 'Error: no such property: %s' % prop
         sys.exit(2)
-    elif gui:
+    elif creategui:
+        gui = creategui(meter, output.debug)
         gui.refresh()
         import gtk
         gtk.main()

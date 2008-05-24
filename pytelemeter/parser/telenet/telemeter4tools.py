@@ -1,5 +1,3 @@
-# See COPYING for info about the license (GNU GPL)
-# Check AUTHORS to see who wrote this software.
 """
     pytelemeter parser using the telemeter4tools service, plus caching
 """
@@ -7,8 +5,9 @@
 import os
 import datetime
 import time
+import SOAPpy
 from xml.dom import minidom
-from Parser import *
+from pytelemeter.parser import *
 
 # constants
 URL='https://telemeter4tools.services.telenet.be/TelemeterService?wsdl'
@@ -19,9 +18,12 @@ except KeyError:
 CACHE = '/var/tmp/telemeter_%s.xml' % username
 
 
-class Parser(TelemeterParser):
-    def __init__(self, output):
-        self.output = output
+class Telemeter4ToolsParser(Parser):
+    def __init__(self):
+        self.wascached = False
+
+    def was_cached(self):
+        return self.wascached
 
     def valid_cache(self):
         try:
@@ -41,24 +43,22 @@ class Parser(TelemeterParser):
         if os.path.isfile(CACHE):
             os.remove(CACHE)
 
-    def fetch(self, username, password):
+    def fetch(self, account):
         if self.valid_cache():
             file = open(CACHE, 'r')
             xml = file.read()
             file.close()
-            if not self.output.silent:
-                print 'from cache... ',
+            self.wascached = True
         else:
-            import SOAPpy
-            soap = SOAPpy.SOAPProxy(URL)
-            del SOAPpy
-            xml = soap.getUsage(string=username, string0=password)
+            xml = SOAPpy.SOAPProxy(URL).getUsage(
+                string=account.username, string0=account.password)
             try:
                 file = open(CACHE,'w')
                 file.write(xml)
                 file.close()
             except:
                 pass
+            self.wascached = False
         node = _Ns1Node(minidom.parseString(xml))
         status = str(node['usage-info']['status'])
         if status != 'OK':
@@ -79,12 +79,11 @@ class Parser(TelemeterParser):
                     'login or password incorrect'
         service_node = node['usage-info']['data']['service']
 
-        usage = Usage()
+        usage = Usage(['sum'])
 
-        usage.down.base = int(service_node['totalusage']['down'])
-        usage.down.base_max = int(service_node['limits']['max-down'])
-        usage.up.base = int(service_node['totalusage']['up'])
-        usage.up.base_max = int(service_node['limits']['max-up'])
+        month = usage.totals['sum']
+        month.mib = int(service_node['totalusage']['up'])
+        month.max = int(service_node['limits']['max-up'])
 
         today = datetime.date.today()
         for day in service_node['usage']:
@@ -92,8 +91,9 @@ class Parser(TelemeterParser):
             t = time.strptime(datestring, '%Y%m%d')
             date = datetime.date(t[0], t[1], t[2])
             if date <= today:
-                usage.chart.append(UsageDay(date, int(day['down']),
-                                                    int(day['up'])))
+                values = {}
+                values['sum'] = int(day['up'])
+                usage.chart.append(UsageDay(date, values))
 
         return usage
 

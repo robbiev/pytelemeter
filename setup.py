@@ -6,7 +6,7 @@
 # Check AUTHORS to see who wrote this software.
 
 from distutils.core import setup
-from pytelemeter import VERSION
+from pytelemeter import __version__
 import sys
 import glob
 import re
@@ -50,14 +50,15 @@ classifiers = [
     'Topic :: Internet :: WWW/HTTP' ]
 
 setup(name='pytelemeter',
-      version=VERSION,
+      version=__version__,
       description=short,
       long_description=long,
       classifiers=classifiers,
       author=', '.join([author[0] for author in authors]),
       author_email=', '.join([author[1] for author in authors]),
       url='http://pytelemeter.sourceforge.net',
-      packages = ['pytelemeter'],
+      packages = ['pytelemeter', 'pytelemeter/parser',
+      'pytelemeter/parser/scarlet', 'pytelemeter/parser/telenet'],
       scripts=glob.glob('scripts/*'),
       data_files = [('share/pixmaps', glob.glob('images/*')),
                     ('share/pytelemeter', glob.glob('glade/*glade'))],
