@@ -7,6 +7,14 @@ Make sure you agree to all the terms stated in the COPYING file (GNU GPL v2) bef
 <br>
 </p>
 
+
+<b>22/01/2011</b>
+<br>
+ This project has been abandoned. For the latest sources, please from now on refer to <a href="https://github.com/robbiev/pytelemeter">GitHub</a>. 
+<br>
+<br>
+
+
 <b>29/01/2009</b>
 <br>
  <a href="?down">Version 1.5</a>  was released. You can now also install pytelemeter from a repository.
